@@ -48,6 +48,7 @@ export default function Home() {
 
       <div className="home-body">
         <div className="work-list">
+          <div className="section-title">작품 리스트</div>
           {works.map((w) => (
             <div
               key={w.id}
