@@ -263,6 +263,25 @@ export async function initDb(): Promise<void> {
   // Migrations
   try { await d.execute("ALTER TABLE notes ADD COLUMN parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE"); } catch { /* exists */ }
   try { await d.execute("ALTER TABLE episodes ADD COLUMN thumbnail TEXT DEFAULT ''"); } catch { /* exists */ }
+  // Remove old UNIQUE constraint by recreating table if needed
+  try {
+    const tableInfo = await d.select<{ sql: string }[]>("SELECT sql FROM sqlite_master WHERE type='table' AND name='notes'");
+    if (tableInfo[0]?.sql?.includes("UNIQUE")) {
+      await d.execute("ALTER TABLE notes RENAME TO notes_old");
+      await d.execute(`CREATE TABLE notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        work_id INTEGER NOT NULL REFERENCES works(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        content TEXT DEFAULT '',
+        sort_order INTEGER DEFAULT 0,
+        parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`);
+      await d.execute("INSERT INTO notes SELECT * FROM notes_old");
+      await d.execute("DROP TABLE notes_old");
+    }
+  } catch { /* migration not needed */ }
   await d.execute(`CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL

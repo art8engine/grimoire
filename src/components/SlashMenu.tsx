@@ -1,16 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { SLASH_COMMANDS } from "../lib/templates";
 
 interface SlashMenuProps {
   query: string;
-  position: { top: number; left: number };
   onSelect: (commandId: string) => void;
   onClose: () => void;
 }
 
-export default function SlashMenu({ query, position, onSelect, onClose }: SlashMenuProps) {
+export default function SlashMenu({ query, onSelect, onClose }: SlashMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
 
   const filtered = SLASH_COMMANDS.filter(
     (c) => c.id.includes(query.toLowerCase()) || c.label.includes(query)
@@ -24,34 +22,41 @@ export default function SlashMenu({ query, position, onSelect, onClose }: SlashM
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         setSelectedIndex((i) => Math.min(i + 1, filtered.length - 1));
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         setSelectedIndex((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter") {
+      } else if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
         if (filtered[selectedIndex]) {
           onSelect(filtered[selectedIndex].id);
         }
       }
     };
-    window.addEventListener("keydown", handler, true);
-    return () => window.removeEventListener("keydown", handler, true);
+    // Use capture phase to intercept before TipTap
+    document.addEventListener("keydown", handler, true);
+    return () => document.removeEventListener("keydown", handler, true);
   }, [filtered, selectedIndex, onSelect, onClose]);
 
   if (filtered.length === 0) return null;
 
   return (
-    <div className="slash-menu" ref={ref} style={{ top: position.top, left: position.left }}>
+    <div className="slash-menu">
       {filtered.map((cmd, i) => (
         <div
           key={cmd.id}
           className={`slash-menu-item${i === selectedIndex ? " active" : ""}`}
           onMouseDown={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             onSelect(cmd.id);
           }}
           onMouseEnter={() => setSelectedIndex(i)}

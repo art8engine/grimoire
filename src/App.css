@@ -470,6 +470,8 @@ input, textarea {
 /* Slash Menu */
 .slash-menu {
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: 50;
   background: #fff;
   border: 1px solid #eee;

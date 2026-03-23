@@ -31,13 +31,12 @@ export default function Notes() {
   const [renameName, setRenameName] = useState("");
   const [slashOpen, setSlashOpen] = useState(false);
   const [slashQuery, setSlashQuery] = useState("");
-  const [slashPos, setSlashPos] = useState({ top: 0, left: 0 });
   const [nameInput, setNameInput] = useState(false);
   const [pageName, setPageName] = useState("");
   const { showToolbar, fontSize } = useSettings();
 
-  const handleSlashOpen = useCallback((pos: { top: number; left: number }) => {
-    setSlashPos(pos);
+  const handleSlashUpdate = useCallback((query: string) => {
+    setSlashQuery(query);
     setSlashOpen(true);
   }, []);
 
@@ -47,8 +46,8 @@ export default function Notes() {
   }, []);
 
   const slashExt = useMemo(
-    () => SlashDetector(handleSlashOpen, handleSlashClose),
-    [handleSlashOpen, handleSlashClose]
+    () => SlashDetector(handleSlashUpdate, handleSlashClose),
+    [handleSlashUpdate, handleSlashClose]
   );
 
   const handlePageLinkClick = useCallback((noteId: number) => {
@@ -65,15 +64,6 @@ export default function Notes() {
     ],
     content: "",
     onUpdate: ({ editor: e }) => {
-      // Track slash query
-      try {
-        const { state } = e;
-        const { $from } = state.selection;
-        const text = $from.parent.textContent;
-        if (text.startsWith("/") && slashOpen) {
-          setSlashQuery(text.slice(1));
-        }
-      } catch { /* */ }
       setContent(JSON.stringify(e.getJSON()));
     },
   }, [slashExt]);
@@ -89,9 +79,21 @@ export default function Notes() {
         if (nid) handlePageLinkClick(Number(nid));
       }
     };
-    const dom = editor.view.dom;
-    dom.addEventListener("click", handleClick);
-    return () => dom.removeEventListener("click", handleClick);
+    // Use a safe timeout to wait for view mount
+    const timer = setTimeout(() => {
+      try {
+        const dom = editor.view?.dom;
+        if (dom) {
+          dom.addEventListener("click", handleClick);
+        }
+      } catch { /* view not ready */ }
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+      try {
+        editor.view?.dom?.removeEventListener("click", handleClick);
+      } catch { /* */ }
+    };
   }, [editor, handlePageLinkClick]);
 
   // Load notes, ensure defaults exist
@@ -276,7 +278,6 @@ export default function Notes() {
             {slashOpen && (
               <SlashMenu
                 query={slashQuery}
-                position={slashPos}
                 onSelect={handleSlashSelect}
                 onClose={handleSlashClose}
               />
