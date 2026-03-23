@@ -1,17 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { initDb } from "../lib/db";
 
 export default function Splash() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const start = Date.now();
-    initDb().then(() => {
-      const elapsed = Date.now() - start;
-      const remaining = Math.max(0, 1000 - elapsed);
-      setTimeout(() => navigate("/home", { replace: true }), remaining);
-    });
+    setTimeout(() => navigate("/home", { replace: true }), 1000);
   }, [navigate]);
 
   return (
