@@ -25,7 +25,6 @@ export default function Notes() {
   const [renameName, setRenameName] = useState("");
   const [showSlashInput, setShowSlashInput] = useState(false);
   const [slashName, setSlashName] = useState("");
-  const [loaded, setLoaded] = useState(false);
   const { showToolbar, fontSize } = useSettings();
 
   const editor = useEditor({
@@ -39,23 +38,22 @@ export default function Notes() {
     },
   });
 
-  // Load notes
   useEffect(() => {
     if (!workId || isNaN(workId)) return;
     getNotes(workId).then((n) => {
       setNotes(n);
       if (noteId) {
         const found = n.find((note) => note.id === Number(noteId));
-        if (found) { setActiveNote(found); }
-        else if (n.length > 0) { setActiveNote(n[0]); }
+        if (found) setActiveNote(found);
+        else if (n.length > 0) setActiveNote(n[0]);
       } else if (n.length > 0) {
         setActiveNote(n[0]);
       }
-      setLoaded(true);
+    }).catch((err) => {
+      console.error("Failed to load notes:", err);
     });
   }, [workId, noteId]);
 
-  // Sync editor with active note
   useEffect(() => {
     if (!editor || !activeNote) return;
     try {
@@ -93,7 +91,6 @@ export default function Notes() {
     }
   }, [workId, activeNote, content, navigate]);
 
-  // Detect /page typing
   useEffect(() => {
     if (!editor) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -153,8 +150,6 @@ export default function Notes() {
       else navigate(`/work/${workId}/notes`, { replace: true });
     }
   };
-
-  if (!loaded) return null;
 
   const breadcrumb = activeNote ? `노트 / ${activeNote.name}` : "노트";
 
