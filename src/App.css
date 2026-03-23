@@ -120,42 +120,75 @@ input, textarea {
   overflow-y: auto;
 }
 
-.work-item {
-  display: flex;
-  align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0f0f0;
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.work-poster {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 3 / 4;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.work-item:hover {
-  background: #fafafa;
-  margin: 0 -20px;
-  padding: 14px 20px;
+.work-poster:hover {
+  border-color: #222;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.work-info {
+.work-poster-body {
   flex: 1;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-.work-title {
+.work-poster-title {
   font-weight: 600;
   font-size: 14px;
+  line-height: 1.4;
 }
 
-.work-desc {
+.work-poster-desc {
   font-size: 11px;
   color: #999;
-  margin-top: 3px;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 
-.work-episodes {
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
-  padding: 4px 10px;
-  background: #f5f5f5;
-  border-radius: 4px;
+.work-poster-footer {
+  padding: 8px 14px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.work-poster-episodes {
+  font-size: 11px;
+  color: #999;
+}
+
+.work-poster-add {
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 13px;
+  gap: 8px;
+  border-style: dashed;
+}
+
+.work-poster-add:hover {
+  color: #222;
+  border-color: #222;
+}
+
+.work-poster-add span:first-child {
+  font-size: 24px;
 }
 
 .work-add-btn {
@@ -907,11 +940,14 @@ html.dark .splash { background: #1a1a1a; }
 html.dark .splash-logo { color: #e0e0e0; }
 html.dark .splash-sub { color: #666; }
 
-html.dark .work-item { border-bottom-color: #2a2a2a; }
-html.dark .work-item:hover { background: #222; }
-html.dark .work-title { color: #e0e0e0; }
-html.dark .work-desc { color: #666; }
-html.dark .work-episodes { color: #999; background: #2a2a2a; }
+html.dark .work-poster { border-color: #333; }
+html.dark .work-poster:hover { border-color: #e0e0e0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+html.dark .work-poster-title { color: #e0e0e0; }
+html.dark .work-poster-desc { color: #666; }
+html.dark .work-poster-footer { border-top-color: #333; }
+html.dark .work-poster-episodes { color: #666; }
+html.dark .work-poster-add { color: #555; border-color: #333; }
+html.dark .work-poster-add:hover { color: #e0e0e0; border-color: #e0e0e0; }
 html.dark .work-add-btn { color: #666; border-color: #333; background: #1a1a1a; }
 html.dark .work-add-btn:hover { color: #e0e0e0; border-color: #e0e0e0; }
 html.dark .section-title { color: #666; }

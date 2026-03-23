@@ -63,26 +63,34 @@ export default function Home({ dark, onToggleDark }: HomeProps) {
       <div className="home-body">
         <div className="work-list">
           <div className="section-title">작품 리스트</div>
-          {works.map((w) => (
-            <div
-              key={w.id}
-              className="work-item"
-              onClick={() => navigate(`/work/${w.id}`)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setCtx({ x: e.clientX, y: e.clientY, work: w });
-              }}
-            >
-              <div className="work-info">
-                <div className="work-title">{w.title}</div>
-                {w.description && <div className="work-desc">{w.description}</div>}
+          <div className="work-grid">
+            {works.map((w) => (
+              <div
+                key={w.id}
+                className="work-poster"
+                onClick={() => navigate(`/work/${w.id}`)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setCtx({ x: e.clientX, y: e.clientY, work: w });
+                }}
+              >
+                <div className="work-poster-body">
+                  <div className="work-poster-title">{w.title}</div>
+                  {w.description && <div className="work-poster-desc">{w.description}</div>}
+                </div>
+                <div className="work-poster-footer">
+                  <span className="work-poster-episodes">{w.episode_count ?? 0}화</span>
+                </div>
               </div>
-              <div className="work-episodes">{w.episode_count ?? 0}화</div>
+            ))}
+            <div
+              className="work-poster work-poster-add"
+              onClick={() => setShowCreate(true)}
+            >
+              <span>+</span>
+              <span>작품 추가하기</span>
             </div>
-          ))}
-          <button className="work-add-btn" onClick={() => setShowCreate(true)}>
-            + 작품 추가하기
-          </button>
+          </div>
         </div>
 
         <div className="home-profile" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
