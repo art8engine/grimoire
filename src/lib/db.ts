@@ -44,7 +44,12 @@ export async function createWork(title: string, description: string): Promise<nu
     "INSERT INTO works (title, description) VALUES (?, ?)",
     [title, description]
   );
-  return result.lastInsertId ?? 0;
+  const workId = result.lastInsertId ?? 0;
+  // Create default note pages
+  await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "메인 노트", 0]);
+  await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "캐릭터", 1]);
+  await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "세계관", 2]);
+  return workId;
 }
 
 export async function updateWork(id: number, title: string, description: string): Promise<void> {
