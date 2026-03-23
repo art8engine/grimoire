@@ -161,17 +161,20 @@ input, textarea {
 .work-add-btn {
   display: block;
   width: 100%;
-  padding: 14px 0;
+  padding: 12px 0;
   text-align: center;
   color: #999;
   font-size: 13px;
-  border-top: 1px solid #f0f0f0;
-  margin-top: 8px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-top: 16px;
   cursor: pointer;
+  background: #fff;
 }
 
 .work-add-btn:hover {
   color: #222;
+  border-color: #222;
 }
 
 /* Profile */
@@ -239,6 +242,167 @@ input, textarea {
 .dashboard-card-label {
   font-size: 13px;
   font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.dashboard-card-sub {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.dashboard-card-draft {
+  color: #bbb;
+}
+
+.note-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.note-tree-item {
+  font-size: 11px;
+  color: #999;
+}
+
+/* Episode List */
+.episode-list {
+  flex: 1;
+  padding: 8px 20px;
+  overflow-y: auto;
+}
+
+.episode-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+.episode-list-item:hover {
+  background: #fafafa;
+  margin: 0 -20px;
+  padding: 14px 20px;
+}
+
+.episode-list-num {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.episode-list-date {
+  font-size: 11px;
+  color: #bbb;
+}
+
+.episode-list-header {
+  text-align: center;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 4px;
+}
+
+.episode-list-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.episode-list-desc {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.episode-list-progress {
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 8px;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+  padding: 16px 0 12px;
+  letter-spacing: 1px;
+}
+
+/* Editor Bottom Bar */
+.editor-bottom {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px;
+  border-top: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.btn-save {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #666;
+  background: #fff;
+}
+
+.btn-save:hover {
+  border-color: #222;
+  color: #222;
+}
+
+.btn-upload {
+  flex: 1;
+  padding: 10px;
+  background: #222;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.btn-upload:hover {
+  background: #000;
+}
+
+.btn-saved {
+  color: #bbb;
+}
+
+/* Slash Input */
+.slash-input-bar {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 8px;
+  background: #fafafa;
+}
+
+.slash-input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #222;
+  background: #eee;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.slash-input {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.slash-input:focus {
+  border-color: #222;
 }
 
 /* Episode Editor */
@@ -626,6 +790,8 @@ input, textarea {
   border-radius: 50%;
   background: #eee;
   border: 2px solid #ddd;
+  cursor: pointer;
+  overflow: hidden;
 }
 
 .profile-form {
