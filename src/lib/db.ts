@@ -124,6 +124,7 @@ export interface Note {
   name: string;
   content: string;
   sort_order: number;
+  parent_id: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -136,11 +137,11 @@ export async function getNotes(workId: number): Promise<Note[]> {
   );
 }
 
-export async function createNote(workId: number, name: string): Promise<number> {
+export async function createNote(workId: number, name: string, parentId: number | null = null): Promise<number> {
   const d = await getDb();
   const result = await d.execute(
-    "INSERT INTO notes (work_id, name) VALUES (?, ?)",
-    [workId, name]
+    "INSERT INTO notes (work_id, name, parent_id) VALUES (?, ?, ?)",
+    [workId, name, parentId]
   );
   return result.lastInsertId ?? 0;
 }
@@ -185,6 +186,36 @@ export async function setSetting(key: string, value: string): Promise<void> {
   );
 }
 
+export async function ensureDefaultNotes(workId: number): Promise<void> {
+  const d = await getDb();
+  const existing = await d.select<{ cnt: number }[]>(
+    "SELECT COUNT(*) as cnt FROM notes WHERE work_id = ?",
+    [workId]
+  );
+  if (existing[0]?.cnt === 0) {
+    await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "메인 노트", 0]);
+    await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "캐릭터", 1]);
+    await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "세계관", 2]);
+  }
+}
+
+export function buildNoteTree(notes: Note[]): (Note & { children: Note[] })[] {
+  const map = new Map<number, Note & { children: Note[] }>();
+  const roots: (Note & { children: Note[] })[] = [];
+  for (const n of notes) {
+    map.set(n.id, { ...n, children: [] });
+  }
+  for (const n of notes) {
+    const node = map.get(n.id)!;
+    if (n.parent_id && map.has(n.parent_id)) {
+      map.get(n.parent_id)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
+
 // --- Init ---
 
 export async function initDb(): Promise<void> {
@@ -214,10 +245,16 @@ export async function initDb(): Promise<void> {
     name TEXT NOT NULL,
     content TEXT DEFAULT '',
     sort_order INTEGER DEFAULT 0,
+    parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(work_id, name)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  // Migration: add parent_id if table already exists without it
+  try {
+    await d.execute("ALTER TABLE notes ADD COLUMN parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE");
+  } catch {
+    // column already exists
+  }
   await d.execute(`CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL

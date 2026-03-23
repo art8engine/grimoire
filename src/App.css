@@ -438,6 +438,63 @@ input, textarea {
   border-color: #222;
 }
 
+/* Slash Menu */
+.slash-menu {
+  position: absolute;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  padding: 4px 0;
+}
+
+.slash-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.slash-menu-item:hover,
+.slash-menu-item.active {
+  background: #f5f5f5;
+}
+
+.slash-menu-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.slash-menu-desc {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+
+/* Page Link Node */
+.page-link-node {
+  padding: 8px 12px;
+  margin: 4px 0;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #222;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.page-link-node:hover {
+  border-color: #222;
+  background: #fafafa;
+}
+
+html.dark .slash-menu { background: #222; border-color: #333; }
+html.dark .slash-menu-item:hover,
+html.dark .slash-menu-item.active { background: #2a2a2a; }
+html.dark .slash-menu-desc { color: #666; }
+html.dark .page-link-node { border-color: #333; color: #e0e0e0; }
+html.dark .page-link-node:hover { border-color: #e0e0e0; background: #2a2a2a; }
+
 /* Episode Editor */
 .editor-page {
   height: 100vh;
