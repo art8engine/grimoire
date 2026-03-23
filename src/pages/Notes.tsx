@@ -153,6 +153,15 @@ export default function Notes() {
 
   const breadcrumb = activeNote ? `노트 / ${activeNote.name}` : "노트";
 
+  if (!editor) {
+    return (
+      <div className="notes-page">
+        <TopBar showBack right={breadcrumb} />
+        <div className="notes-loading">에디터 로딩 중...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="notes-page">
       <TopBar showBack right={breadcrumb} />
