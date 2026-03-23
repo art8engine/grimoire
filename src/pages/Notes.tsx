@@ -94,7 +94,9 @@ export default function Notes() {
   useEffect(() => {
     if (!editor) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === " " || event.key === "Enter") {
+      if (event.key !== " " && event.key !== "Enter") return;
+      if (!editor.isFocused) return;
+      try {
         const { state } = editor;
         const { $from } = state.selection;
         const lineText = $from.parent.textContent.trim();
@@ -106,11 +108,12 @@ export default function Notes() {
           setSlashName("");
           setShowSlashInput(true);
         }
+      } catch {
+        // editor view not ready
       }
     };
-    const el = editor.view.dom;
-    el.addEventListener("keydown", handleKeyDown);
-    return () => el.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [editor]);
 
   const handleSlashSubmit = () => {
