@@ -191,9 +191,7 @@ export default function Notes() {
         </div>
 
         <div className="note-content">
-          {activeNote && (
-            <div className="note-title">{activeNote.name}</div>
-          )}
+          <div className="note-title">{activeNote ? activeNote.name : "/page 이름 입력 후 Enter"}</div>
           {showToolbar && <Toolbar editor={editor} />}
 
           {showSlashInput && (
