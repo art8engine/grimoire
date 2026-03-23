@@ -25,43 +25,46 @@ export default function Notes() {
   const [renameName, setRenameName] = useState("");
   const [showSlashInput, setShowSlashInput] = useState(false);
   const [slashName, setSlashName] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const { showToolbar, fontSize } = useSettings();
 
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Placeholder.configure({ placeholder: "" }),
+      Placeholder.configure({ placeholder: "/page 이름 입력 후 Enter로 페이지 추가" }),
     ],
-    content: undefined,
+    content: "",
     onUpdate: ({ editor: e }) => {
       setContent(JSON.stringify(e.getJSON()));
     },
   });
 
-  const loadNotes = useCallback(async () => {
-    const n = await getNotes(workId);
-    setNotes(n);
-    return n;
-  }, [workId]);
-
-  // Load notes and set active based on URL
+  // Load notes
   useEffect(() => {
-    loadNotes().then((n) => {
+    if (!workId || isNaN(workId)) return;
+    getNotes(workId).then((n) => {
+      setNotes(n);
       if (noteId) {
         const found = n.find((note) => note.id === Number(noteId));
-        if (found) setActiveNote(found);
-        else if (n.length > 0) setActiveNote(n[0]);
+        if (found) { setActiveNote(found); }
+        else if (n.length > 0) { setActiveNote(n[0]); }
       } else if (n.length > 0) {
         setActiveNote(n[0]);
       }
+      setLoaded(true);
     });
-  }, [loadNotes, noteId]);
+  }, [workId, noteId]);
 
+  // Sync editor with active note
   useEffect(() => {
-    if (activeNote && editor) {
-      const parsed = activeNote.content ? JSON.parse(activeNote.content) : undefined;
+    if (!editor || !activeNote) return;
+    try {
+      const parsed = activeNote.content ? JSON.parse(activeNote.content) : null;
       editor.commands.setContent(parsed ?? "");
       setContent(activeNote.content || "");
+    } catch {
+      editor.commands.setContent("");
+      setContent("");
     }
   }, [activeNote?.id, editor]);
 
@@ -90,26 +93,24 @@ export default function Notes() {
     }
   }, [workId, activeNote, content, navigate]);
 
-  // Detect /page typing in editor
+  // Detect /page typing
   useEffect(() => {
     if (!editor) return;
-
     const handleKeyDown = (event: KeyboardEvent) => {
-      const { state } = editor;
-      const { $from } = state.selection;
-      const lineText = $from.parent.textContent;
-
-      if (lineText.trim() === "/page" && event.key !== "Backspace") {
-        // Show the slash input UI
-        event.preventDefault();
-        const start = $from.start();
-        const end = $from.end();
-        editor.chain().deleteRange({ from: start, to: end }).run();
-        setSlashName("");
-        setShowSlashInput(true);
+      if (event.key === " " || event.key === "Enter") {
+        const { state } = editor;
+        const { $from } = state.selection;
+        const lineText = $from.parent.textContent.trim();
+        if (lineText === "/page") {
+          event.preventDefault();
+          const start = $from.start();
+          const end = $from.end();
+          editor.chain().deleteRange({ from: start, to: end }).run();
+          setSlashName("");
+          setShowSlashInput(true);
+        }
       }
     };
-
     const el = editor.view.dom;
     el.addEventListener("keydown", handleKeyDown);
     return () => el.removeEventListener("keydown", handleKeyDown);
@@ -133,7 +134,8 @@ export default function Notes() {
     if (!renaming || !renameName.trim()) return;
     await renameNote(renaming.id, renameName.trim());
     setRenaming(null);
-    const n = await loadNotes();
+    const n = await getNotes(workId);
+    setNotes(n);
     if (activeNote?.id === renaming.id) {
       setActiveNote(n.find((note) => note.id === renaming.id) ?? null);
     }
@@ -142,7 +144,8 @@ export default function Notes() {
   const handleDelete = async (note: Note) => {
     if (!confirm(`"${note.name}" 페이지를 삭제하시겠습니까?`)) return;
     await deleteNote(note.id);
-    const n = await loadNotes();
+    const n = await getNotes(workId);
+    setNotes(n);
     if (activeNote?.id === note.id) {
       const next = n[0] ?? null;
       setActiveNote(next);
@@ -150,6 +153,8 @@ export default function Notes() {
       else navigate(`/work/${workId}/notes`, { replace: true });
     }
   };
+
+  if (!loaded) return null;
 
   const breadcrumb = activeNote ? `노트 / ${activeNote.name}` : "노트";
 
@@ -191,8 +196,9 @@ export default function Notes() {
         </div>
 
         <div className="note-content">
-          <div className="note-title">{activeNote ? activeNote.name : "/page 이름 입력 후 Enter"}</div>
-          {showToolbar && <Toolbar editor={editor} />}
+          <div className="note-title">
+            {activeNote ? activeNote.name : "노트"}
+          </div>
 
           {showSlashInput && (
             <div className="slash-input-bar">
@@ -210,6 +216,8 @@ export default function Notes() {
               />
             </div>
           )}
+
+          {showToolbar && <Toolbar editor={editor} />}
 
           <div className="editor-area" style={{ fontSize }}>
             <EditorContent editor={editor} />
