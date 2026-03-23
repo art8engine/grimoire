@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -14,7 +14,8 @@ import { useSettings } from "../hooks/useSettings";
 import type { Note } from "../lib/db";
 
 export default function Notes() {
-  const { id } = useParams();
+  const { id, noteId } = useParams();
+  const navigate = useNavigate();
   const workId = Number(id);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
@@ -22,6 +23,8 @@ export default function Notes() {
   const [sideCtx, setSideCtx] = useState<{ x: number; y: number; note: Note } | null>(null);
   const [renaming, setRenaming] = useState<Note | null>(null);
   const [renameName, setRenameName] = useState("");
+  const [showSlashInput, setShowSlashInput] = useState(false);
+  const [slashName, setSlashName] = useState("");
   const { showToolbar, fontSize } = useSettings();
 
   const editor = useEditor({
@@ -31,22 +34,6 @@ export default function Notes() {
     ],
     content: undefined,
     onUpdate: ({ editor: e }) => {
-      const text = e.state.doc.textBetween(
-        Math.max(0, e.state.selection.from - 50),
-        e.state.selection.from,
-        " "
-      );
-      const match = text.match(/\/page\s+(.+)$/);
-      if (match) {
-        const name = match[1].trim();
-        if (name) {
-          const from = e.state.selection.from - match[0].length;
-          const to = e.state.selection.from;
-          e.chain().deleteRange({ from, to }).run();
-          handleCreateNote(name);
-          return;
-        }
-      }
       setContent(JSON.stringify(e.getJSON()));
     },
   });
@@ -57,11 +44,18 @@ export default function Notes() {
     return n;
   }, [workId]);
 
+  // Load notes and set active based on URL
   useEffect(() => {
     loadNotes().then((n) => {
-      if (n.length > 0) setActiveNote(n[0]);
+      if (noteId) {
+        const found = n.find((note) => note.id === Number(noteId));
+        if (found) setActiveNote(found);
+        else if (n.length > 0) setActiveNote(n[0]);
+      } else if (n.length > 0) {
+        setActiveNote(n[0]);
+      }
     });
-  }, [loadNotes]);
+  }, [loadNotes, noteId]);
 
   useEffect(() => {
     if (activeNote && editor) {
@@ -80,21 +74,59 @@ export default function Notes() {
 
   useAutoSave(content, save);
 
-  const handleCreateNote = async (name: string) => {
+  const handleCreateNote = useCallback(async (name: string) => {
     if (activeNote && content) await updateNoteContent(activeNote.id, content);
     try {
       await createNote(workId, name);
     } catch {
       return;
     }
-    const n = await loadNotes();
+    const n = await getNotes(workId);
+    setNotes(n);
     const created = n.find((note) => note.name === name);
-    if (created) setActiveNote(created);
+    if (created) {
+      setActiveNote(created);
+      navigate(`/work/${workId}/notes/${created.id}`, { replace: true });
+    }
+  }, [workId, activeNote, content, navigate]);
+
+  // Detect /page typing in editor
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const { state } = editor;
+      const { $from } = state.selection;
+      const lineText = $from.parent.textContent;
+
+      if (lineText.trim() === "/page" && event.key !== "Backspace") {
+        // Show the slash input UI
+        event.preventDefault();
+        const start = $from.start();
+        const end = $from.end();
+        editor.chain().deleteRange({ from: start, to: end }).run();
+        setSlashName("");
+        setShowSlashInput(true);
+      }
+    };
+
+    const el = editor.view.dom;
+    el.addEventListener("keydown", handleKeyDown);
+    return () => el.removeEventListener("keydown", handleKeyDown);
+  }, [editor]);
+
+  const handleSlashSubmit = () => {
+    const name = slashName.trim();
+    if (!name) return;
+    setShowSlashInput(false);
+    setSlashName("");
+    handleCreateNote(name);
   };
 
   const handleSelectNote = async (note: Note) => {
     if (activeNote && content) await updateNoteContent(activeNote.id, content);
     setActiveNote(note);
+    navigate(`/work/${workId}/notes/${note.id}`, { replace: true });
   };
 
   const handleRename = async () => {
@@ -112,13 +144,18 @@ export default function Notes() {
     await deleteNote(note.id);
     const n = await loadNotes();
     if (activeNote?.id === note.id) {
-      setActiveNote(n[0] ?? null);
+      const next = n[0] ?? null;
+      setActiveNote(next);
+      if (next) navigate(`/work/${workId}/notes/${next.id}`, { replace: true });
+      else navigate(`/work/${workId}/notes`, { replace: true });
     }
   };
 
+  const breadcrumb = activeNote ? `노트 / ${activeNote.name}` : "노트";
+
   return (
     <div className="notes-page">
-      <TopBar showBack />
+      <TopBar showBack right={breadcrumb} />
 
       <div className="notes-body">
         <div className="note-sidebar">
@@ -158,6 +195,24 @@ export default function Notes() {
             <div className="note-title">{activeNote.name}</div>
           )}
           {showToolbar && <Toolbar editor={editor} />}
+
+          {showSlashInput && (
+            <div className="slash-input-bar">
+              <span className="slash-input-label">/page</span>
+              <input
+                className="slash-input"
+                placeholder="페이지 이름"
+                value={slashName}
+                onChange={(e) => setSlashName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSlashSubmit();
+                  if (e.key === "Escape") { setShowSlashInput(false); setSlashName(""); }
+                }}
+                autoFocus
+              />
+            </div>
+          )}
+
           <div className="editor-area" style={{ fontSize }}>
             <EditorContent editor={editor} />
           </div>
