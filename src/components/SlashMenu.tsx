@@ -1,14 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
-interface Command {
-  id: string;
-  label: string;
-  description: string;
-}
-
-const COMMANDS: Command[] = [
-  { id: "page", label: "페이지", description: "하위 페이지 추가" },
-];
+import { SLASH_COMMANDS } from "../lib/templates";
 
 interface SlashMenuProps {
   query: string;
@@ -21,7 +12,7 @@ export default function SlashMenu({ query, position, onSelect, onClose }: SlashM
   const [selectedIndex, setSelectedIndex] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
-  const filtered = COMMANDS.filter(
+  const filtered = SLASH_COMMANDS.filter(
     (c) => c.id.includes(query.toLowerCase()) || c.label.includes(query)
   );
 

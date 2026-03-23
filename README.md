@@ -1,6 +1,6 @@
 # Grimoire
 
-<p align="center"><img src="./assets/grimoire.jpg" width="120" /></p>
+<p align="center"><img src="./assets/grimoire.jpg" width="280" /></p>
 
 A minimal novel-writing desktop app for Mac, built with Tauri v2 + React + TipTap + SQLite. Black/white design, Korean-first UI.
 

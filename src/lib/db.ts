@@ -45,10 +45,7 @@ export async function createWork(title: string, description: string): Promise<nu
     [title, description]
   );
   const workId = result.lastInsertId ?? 0;
-  // Create default note pages
-  await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "메인 노트", 0]);
-  await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "캐릭터", 1]);
-  await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "세계관", 2]);
+  await ensureDefaultNotes(workId);
   return workId;
 }
 
@@ -73,6 +70,7 @@ export interface Episode {
   number: number;
   title: string;
   content: string;
+  thumbnail: string;
   created_at: string;
   updated_at: string;
 }
@@ -137,11 +135,11 @@ export async function getNotes(workId: number): Promise<Note[]> {
   );
 }
 
-export async function createNote(workId: number, name: string, parentId: number | null = null): Promise<number> {
+export async function createNote(workId: number, name: string, parentId: number | null = null, content: string = ""): Promise<number> {
   const d = await getDb();
   const result = await d.execute(
-    "INSERT INTO notes (work_id, name, parent_id) VALUES (?, ?, ?)",
-    [workId, name, parentId]
+    "INSERT INTO notes (work_id, name, parent_id, content) VALUES (?, ?, ?, ?)",
+    [workId, name, parentId, content]
   );
   return result.lastInsertId ?? 0;
 }
@@ -187,16 +185,29 @@ export async function setSetting(key: string, value: string): Promise<void> {
 }
 
 export async function ensureDefaultNotes(workId: number): Promise<void> {
+  const { DEFAULT_PAGES } = await import("./templates");
   const d = await getDb();
   const existing = await d.select<{ cnt: number }[]>(
     "SELECT COUNT(*) as cnt FROM notes WHERE work_id = ?",
     [workId]
   );
   if (existing[0]?.cnt === 0) {
-    await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "메인 노트", 0]);
-    await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "캐릭터", 1]);
-    await d.execute("INSERT INTO notes (work_id, name, sort_order) VALUES (?, ?, ?)", [workId, "세계관", 2]);
+    for (let i = 0; i < DEFAULT_PAGES.length; i++) {
+      const page = DEFAULT_PAGES[i];
+      await d.execute(
+        "INSERT INTO notes (work_id, name, sort_order, content) VALUES (?, ?, ?, ?)",
+        [workId, page.name, i, JSON.stringify(page.template)]
+      );
+    }
   }
+}
+
+export async function updateEpisodeThumbnail(id: number, thumbnail: string): Promise<void> {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE episodes SET thumbnail = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [thumbnail, id]
+  );
 }
 
 export function buildNoteTree(notes: Note[]): (Note & { children: Note[] })[] {
@@ -249,12 +260,9 @@ export async function initDb(): Promise<void> {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-  // Migration: add parent_id if table already exists without it
-  try {
-    await d.execute("ALTER TABLE notes ADD COLUMN parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE");
-  } catch {
-    // column already exists
-  }
+  // Migrations
+  try { await d.execute("ALTER TABLE notes ADD COLUMN parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE"); } catch { /* exists */ }
+  try { await d.execute("ALTER TABLE episodes ADD COLUMN thumbnail TEXT DEFAULT ''"); } catch { /* exists */ }
   await d.execute(`CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL

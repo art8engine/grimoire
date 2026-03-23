@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import TopBar from "../components/TopBar";
 import Toolbar from "../components/Toolbar";
 import ReferenceModal from "../components/ReferenceModal";
@@ -35,6 +36,7 @@ export default function Editor() {
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: "" }),
+      Image.configure({ inline: false, allowBase64: true }),
     ],
     content: undefined,
     onUpdate: ({ editor: e }) => {

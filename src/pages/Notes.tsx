@@ -3,12 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import TopBar from "../components/TopBar";
 import Toolbar from "../components/Toolbar";
 import ContextMenu from "../components/ContextMenu";
 import SlashMenu from "../components/SlashMenu";
 import { SlashDetector } from "../lib/slash-command";
 import { PageLink } from "../lib/page-link";
+import { SLASH_COMMANDS } from "../lib/templates";
 import {
   getNotes, createNote, updateNoteContent, renameNote, deleteNote,
   ensureDefaultNotes, buildNoteTree,
@@ -57,6 +59,7 @@ export default function Notes() {
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: "내용을 입력하세요. /로 명령어 사용" }),
+      Image.configure({ inline: false, allowBase64: true }),
       PageLink,
       slashExt,
     ],
@@ -128,11 +131,10 @@ export default function Notes() {
 
   useAutoSave(content, save);
 
-  const handleCreateChildPage = async (name: string) => {
+  const handleCreateChildPage = async (name: string, templateContent?: string) => {
     const parentId = activeNote?.id ?? null;
     try {
-      const newId = await createNote(workId, name, parentId);
-      // Insert page link in editor
+      const newId = await createNote(workId, name, parentId, templateContent || "");
       if (editor) {
         editor.commands.insertPageLink(newId, name);
       }
@@ -143,21 +145,29 @@ export default function Notes() {
     }
   };
 
+  const deleteSlashText = () => {
+    if (!editor) return;
+    try {
+      const { state } = editor;
+      const { $from } = state.selection;
+      const start = $from.start();
+      const end = $from.end();
+      editor.chain().deleteRange({ from: start, to: end }).run();
+    } catch { /* */ }
+  };
+
   const handleSlashSelect = (commandId: string) => {
     handleSlashClose();
-    // Delete the "/" text from editor
-    if (editor) {
-      try {
-        const { state } = editor;
-        const { $from } = state.selection;
-        const start = $from.start();
-        const end = $from.end();
-        editor.chain().deleteRange({ from: start, to: end }).run();
-      } catch { /* */ }
-    }
+    deleteSlashText();
+
     if (commandId === "page") {
       setPageName("");
       setNameInput(true);
+    } else {
+      const cmd = SLASH_COMMANDS.find((c) => c.id === commandId);
+      if (cmd) {
+        handleCreateChildPage(cmd.label, JSON.stringify(cmd.template));
+      }
     }
   };
 

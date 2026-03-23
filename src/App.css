@@ -310,8 +310,8 @@ input, textarea {
 .episode-list-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 0;
+  gap: 12px;
+  padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
 }
@@ -319,7 +319,28 @@ input, textarea {
 .episode-list-item:hover {
   background: #fafafa;
   margin: 0 -20px;
-  padding: 14px 20px;
+  padding: 10px 20px;
+}
+
+.episode-thumb {
+  width: 48px;
+  height: 64px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 1px solid #eee;
+}
+
+.episode-thumb:hover {
+  border-color: #222;
+}
+
+.episode-list-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .episode-list-num {
@@ -330,6 +351,14 @@ input, textarea {
 .episode-list-date {
   font-size: 11px;
   color: #bbb;
+}
+
+/* Editor images */
+.editor-area .tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 8px 0;
 }
 
 .episode-list-header {
@@ -1019,6 +1048,8 @@ html.dark .dashboard-card-sub { color: #666; }
 
 html.dark .episode-list-item { border-bottom-color: #2a2a2a; }
 html.dark .episode-list-item:hover { background: #222; }
+html.dark .episode-thumb { background: #2a2a2a; border-color: #333; }
+html.dark .episode-thumb:hover { border-color: #e0e0e0; }
 html.dark .episode-list-header { border-bottom-color: #2a2a2a; }
 html.dark .episode-list-date { color: #555; }
 

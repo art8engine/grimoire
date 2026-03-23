@@ -1,4 +1,5 @@
 import { Editor } from "@tiptap/react";
+import { pickAndInsertImage } from "../lib/image-upload";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -30,6 +31,8 @@ export default function Toolbar({ editor }: ToolbarProps) {
       {btn("H1", () => editor.chain().focus().toggleHeading({ level: 1 }).run(), editor.isActive("heading", { level: 1 }))}
       {btn("H2", () => editor.chain().focus().toggleHeading({ level: 2 }).run(), editor.isActive("heading", { level: 2 }))}
       {btn("—", () => editor.chain().focus().setHorizontalRule().run(), false)}
+      <div style={{ width: 1, height: 16, background: "#e0e0e0", margin: "0 4px" }} />
+      {btn("IMG", () => pickAndInsertImage(editor), false)}
     </div>
   );
 }

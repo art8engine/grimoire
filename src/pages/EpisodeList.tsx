@@ -1,8 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import ContextMenu from "../components/ContextMenu";
-import { getWork, getEpisodes, createEpisode, deleteEpisode } from "../lib/db";
+import { getWork, getEpisodes, createEpisode, deleteEpisode, updateEpisodeThumbnail } from "../lib/db";
+import { resizeAndEncode } from "../lib/image-upload";
 import type { Work, Episode } from "../lib/db";
 
 export default function EpisodeList() {
@@ -12,6 +13,8 @@ export default function EpisodeList() {
   const [work, setWork] = useState<Work | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [ctx, setCtx] = useState<{ x: number; y: number; ep: Episode } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploadingEpId, setUploadingEpId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     const eps = await getEpisodes(workId);
@@ -35,11 +38,34 @@ export default function EpisodeList() {
     await load();
   };
 
+  const handleThumbnailClick = (epId: number) => {
+    setUploadingEpId(epId);
+    fileRef.current?.click();
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingEpId) return;
+    const src = await resizeAndEncode(file);
+    await updateEpisodeThumbnail(uploadingEpId, src);
+    setUploadingEpId(null);
+    await load();
+    e.target.value = "";
+  };
+
   const latestNum = episodes.length > 0 ? Math.max(...episodes.map((e) => e.number)) : 0;
 
   return (
     <div className="home">
       <TopBar showBack right="원고" />
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleThumbnailUpload}
+      />
 
       <div className="episode-list">
         <div className="episode-list-header">
@@ -60,9 +86,16 @@ export default function EpisodeList() {
               setCtx({ x: e.clientX, y: e.clientY, ep });
             }}
           >
-            <div className="episode-list-num">{ep.number}화</div>
-            <div className="episode-list-date">
-              {new Date(ep.updated_at).toLocaleDateString("ko-KR")}
+            <div
+              className="episode-thumb"
+              onClick={(e) => { e.stopPropagation(); handleThumbnailClick(ep.id); }}
+              style={ep.thumbnail ? { backgroundImage: `url(${ep.thumbnail})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+            />
+            <div className="episode-list-info">
+              <div className="episode-list-num">{ep.number}화</div>
+              <div className="episode-list-date">
+                {new Date(ep.updated_at).toLocaleDateString("ko-KR")}
+              </div>
             </div>
           </div>
         ))}
@@ -78,6 +111,7 @@ export default function EpisodeList() {
           y={ctx.y}
           onClose={() => setCtx(null)}
           items={[
+            { label: "썸네일 변경", onClick: () => handleThumbnailClick(ctx.ep.id) },
             { label: "삭제", danger: true, onClick: () => handleDelete(ctx.ep) },
           ]}
         />
