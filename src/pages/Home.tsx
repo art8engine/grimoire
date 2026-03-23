@@ -4,7 +4,7 @@ import TopBar from "../components/TopBar";
 import CreateWorkModal from "../components/CreateWorkModal";
 import ContextMenu from "../components/ContextMenu";
 import SettingsModal from "../components/SettingsModal";
-import { getWorks, createWork, updateWork, deleteWork } from "../lib/db";
+import { getWorks, createWork, updateWork, deleteWork, getSetting } from "../lib/db";
 import { useSettings } from "../hooks/useSettings";
 import type { Work } from "../lib/db";
 
@@ -15,10 +15,16 @@ export default function Home() {
   const [editWork, setEditWork] = useState<Work | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [ctx, setCtx] = useState<{ x: number; y: number; work: Work } | null>(null);
+  const [profileName, setProfileName] = useState("Writer");
+  const [profileAvatar, setProfileAvatar] = useState("");
   const settings = useSettings();
 
   const load = useCallback(async () => {
     setWorks(await getWorks());
+    const name = await getSetting("profile_name");
+    const avatar = await getSetting("profile_avatar");
+    if (name) setProfileName(name);
+    if (avatar) setProfileAvatar(avatar);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -72,8 +78,11 @@ export default function Home() {
         </div>
 
         <div className="home-profile" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
-          <div className="profile-avatar" />
-          <div className="profile-name">Writer</div>
+          <div
+            className="profile-avatar"
+            style={profileAvatar ? { backgroundImage: `url(${profileAvatar})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+          />
+          <div className="profile-name">{profileName}</div>
         </div>
       </div>
 
