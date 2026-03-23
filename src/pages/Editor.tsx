@@ -5,26 +5,25 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import TopBar from "../components/TopBar";
 import Toolbar from "../components/Toolbar";
-import ContextMenu from "../components/ContextMenu";
 import ReferenceModal from "../components/ReferenceModal";
 import {
-  getWork, getEpisodes, createEpisode, updateEpisodeContent,
-  deleteEpisode, getNotes,
+  getWork, getEpisodes, updateEpisodeContent, getNotes,
 } from "../lib/db";
 import { useAutoSave } from "../hooks/useAutoSave";
 import { useSettings } from "../hooks/useSettings";
 import type { Work, Episode, Note } from "../lib/db";
 
 export default function Editor() {
-  const { id } = useParams();
+  const { id, episodeId } = useParams();
   const workId = Number(id);
+  const epId = Number(episodeId);
   const [work, setWork] = useState<Work | null>(null);
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [activeEp, setActiveEp] = useState<Episode | null>(null);
+  const [episode, setEpisode] = useState<Episode | null>(null);
   const [content, setContent] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [showRef, setShowRef] = useState(false);
-  const [tabCtx, setTabCtx] = useState<{ x: number; y: number; ep: Episode } | null>(null);
+  const [saveStatus, setSaveStatus] = useState("");
+  const [uploadStatus, setUploadStatus] = useState("");
   const { showToolbar, fontSize } = useSettings();
 
   const editor = useEditor({
@@ -38,59 +37,45 @@ export default function Editor() {
     },
   });
 
-  const loadEpisodes = useCallback(async () => {
-    const eps = await getEpisodes(workId);
-    setEpisodes(eps);
-    return eps;
-  }, [workId]);
-
   useEffect(() => {
     getWork(workId).then((w) => setWork(w ?? null));
     getNotes(workId).then(setNotes);
-    loadEpisodes().then((eps) => {
-      if (eps.length > 0) {
-        setActiveEp(eps[0]);
-      }
+    getEpisodes(workId).then((eps) => {
+      const ep = eps.find((e) => e.id === epId);
+      if (ep) setEpisode(ep);
     });
-  }, [workId, loadEpisodes]);
+  }, [workId, epId]);
 
   useEffect(() => {
-    if (activeEp && editor) {
-      const parsed = activeEp.content ? JSON.parse(activeEp.content) : undefined;
+    if (episode && editor) {
+      const parsed = episode.content ? JSON.parse(episode.content) : undefined;
       editor.commands.setContent(parsed ?? "");
-      setContent(activeEp.content || "");
+      setContent(episode.content || "");
     }
-  }, [activeEp?.id, editor]);
+  }, [episode?.id, editor]);
 
   const save = useCallback(
     async (c: string) => {
-      if (activeEp) await updateEpisodeContent(activeEp.id, c);
+      if (episode) await updateEpisodeContent(episode.id, c);
     },
-    [activeEp]
+    [episode]
   );
 
   useAutoSave(content, save);
 
-  const handleAddEpisode = async () => {
-    if (activeEp && content) await updateEpisodeContent(activeEp.id, content);
-    const nextNum = episodes.length > 0 ? Math.max(...episodes.map((e) => e.number)) + 1 : 1;
-    await createEpisode(workId, nextNum);
-    const eps = await loadEpisodes();
-    const newEp = eps.find((e) => e.number === nextNum);
-    if (newEp) setActiveEp(newEp);
+  const handleManualSave = async () => {
+    if (episode && content) {
+      await updateEpisodeContent(episode.id, content);
+      setSaveStatus("저장됨");
+      setTimeout(() => setSaveStatus(""), 1500);
+    }
   };
 
-  const handleSelectEpisode = async (ep: Episode) => {
-    if (activeEp && content) await updateEpisodeContent(activeEp.id, content);
-    setActiveEp(ep);
-  };
-
-  const handleDeleteEpisode = async (ep: Episode) => {
-    if (!confirm(`${ep.number}화를 삭제하시겠습니까?`)) return;
-    await deleteEpisode(ep.id);
-    const eps = await loadEpisodes();
-    if (activeEp?.id === ep.id) {
-      setActiveEp(eps[0] ?? null);
+  const handleUpload = async () => {
+    if (episode && content) {
+      await updateEpisodeContent(episode.id, content);
+      setUploadStatus("업로드 완료");
+      setTimeout(() => setUploadStatus(""), 1500);
     }
   };
 
@@ -108,24 +93,7 @@ export default function Editor() {
 
   return (
     <div className="editor-page">
-      <TopBar showBack right={work?.title} />
-
-      <div className="episode-tabs">
-        {episodes.map((ep) => (
-          <button
-            key={ep.id}
-            className={`episode-tab${activeEp?.id === ep.id ? " active" : ""}`}
-            onClick={() => handleSelectEpisode(ep)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              setTabCtx({ x: e.clientX, y: e.clientY, ep });
-            }}
-          >
-            {ep.number}화
-          </button>
-        ))}
-        <button className="episode-tab-add" onClick={handleAddEpisode}>+</button>
-      </div>
+      <TopBar showBack right={work?.title ? `${work.title} / 원고 / ${episode?.number ?? ""}화` : ""} />
 
       {showToolbar && <Toolbar editor={editor} />}
 
@@ -133,18 +101,16 @@ export default function Editor() {
         <EditorContent editor={editor} />
       </div>
 
-      {showRef && <ReferenceModal notes={notes} onClose={() => setShowRef(false)} />}
+      <div className="editor-bottom">
+        <button className={`btn-save${saveStatus ? " btn-saved" : ""}`} onClick={handleManualSave}>
+          {saveStatus || "임시저장"}
+        </button>
+        <button className="btn-upload" onClick={handleUpload}>
+          {uploadStatus || "업로드"}
+        </button>
+      </div>
 
-      {tabCtx && (
-        <ContextMenu
-          x={tabCtx.x}
-          y={tabCtx.y}
-          onClose={() => setTabCtx(null)}
-          items={[
-            { label: "삭제", danger: true, onClick: () => handleDeleteEpisode(tabCtx.ep) },
-          ]}
-        />
-      )}
+      {showRef && <ReferenceModal notes={notes} onClose={() => setShowRef(false)} />}
     </div>
   );
 }
