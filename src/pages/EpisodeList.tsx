@@ -97,6 +97,13 @@ export default function EpisodeList() {
                 {new Date(ep.updated_at).toLocaleDateString("ko-KR")}
               </div>
             </div>
+            <button
+              className="more-btn-inline"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCtx({ x: e.clientX, y: e.clientY, ep });
+              }}
+            >&#8942;</button>
           </div>
         ))}
 

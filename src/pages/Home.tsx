@@ -74,6 +74,13 @@ export default function Home({ dark, onToggleDark }: HomeProps) {
                   setCtx({ x: e.clientX, y: e.clientY, work: w });
                 }}
               >
+                <button
+                  className="more-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCtx({ x: e.clientX, y: e.clientY, work: w });
+                  }}
+                >&#8942;</button>
                 <div className="work-poster-body">
                   <div className="work-poster-title">{w.title}</div>
                   {w.description && <div className="work-poster-desc">{w.description}</div>}
