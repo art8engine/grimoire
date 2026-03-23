@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Editor from "./pages/Editor";
 import Notes from "./pages/Notes";
 import Profile from "./pages/Profile";
+import EpisodeList from "./pages/EpisodeList";
 
 export default function App() {
   return (
@@ -14,8 +15,10 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/work/:id" element={<Dashboard />} />
-        <Route path="/work/:id/editor" element={<Editor />} />
+        <Route path="/work/:id/episodes" element={<EpisodeList />} />
+        <Route path="/work/:id/editor/:episodeId" element={<Editor />} />
         <Route path="/work/:id/notes" element={<Notes />} />
+        <Route path="/work/:id/notes/:noteId" element={<Notes />} />
       </Routes>
     </BrowserRouter>
   );
