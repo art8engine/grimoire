@@ -8,7 +8,12 @@ import { getWorks, createWork, updateWork, deleteWork, getSetting } from "../lib
 import { useSettings } from "../hooks/useSettings";
 import type { Work } from "../lib/db";
 
-export default function Home() {
+interface HomeProps {
+  dark?: boolean;
+  onToggleDark?: () => void;
+}
+
+export default function Home({ dark, onToggleDark }: HomeProps) {
   const navigate = useNavigate();
   const [works, setWorks] = useState<Work[]>([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -86,6 +91,13 @@ export default function Home() {
             style={profileAvatar ? { backgroundImage: `url(${profileAvatar})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
           />
           <div className="profile-name">{profileName}</div>
+          {onToggleDark && (
+            <div
+              className={`toggle${dark ? " on" : ""}`}
+              onClick={(e) => { e.stopPropagation(); onToggleDark(); }}
+              style={{ marginTop: 8 }}
+            />
+          )}
         </div>
       </div>
 

@@ -861,3 +861,95 @@ input, textarea {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Dark Mode */
+html.dark body {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+html.dark .topbar {
+  border-bottom-color: #333;
+}
+
+html.dark .topbar-logo { color: #e0e0e0; }
+html.dark .topbar-back { color: #777; }
+html.dark .topbar-back:hover { color: #e0e0e0; }
+html.dark .topbar-gear { color: #555; }
+html.dark .topbar-gear:hover { color: #e0e0e0; }
+
+html.dark .splash { background: #1a1a1a; }
+html.dark .splash-logo { color: #e0e0e0; }
+html.dark .splash-sub { color: #666; }
+
+html.dark .work-item { border-bottom-color: #2a2a2a; }
+html.dark .work-item:hover { background: #222; }
+html.dark .work-title { color: #e0e0e0; }
+html.dark .work-desc { color: #666; }
+html.dark .work-episodes { color: #999; background: #2a2a2a; }
+html.dark .work-add-btn { color: #666; border-color: #333; background: #1a1a1a; }
+html.dark .work-add-btn:hover { color: #e0e0e0; border-color: #e0e0e0; }
+html.dark .section-title { color: #666; }
+
+html.dark .home-profile { border-left-color: #2a2a2a; }
+html.dark .profile-avatar { background: #333; border-color: #444; }
+html.dark .profile-name { color: #666; }
+
+html.dark .dashboard-card { border-color: #333; }
+html.dark .dashboard-card:hover { border-color: #e0e0e0; }
+html.dark .dashboard-card-sub { color: #666; }
+
+html.dark .episode-list-item { border-bottom-color: #2a2a2a; }
+html.dark .episode-list-item:hover { background: #222; }
+html.dark .episode-list-header { border-bottom-color: #2a2a2a; }
+html.dark .episode-list-date { color: #555; }
+
+html.dark .episode-tabs { border-bottom-color: #2a2a2a; }
+html.dark .episode-tab { background: #2a2a2a; color: #999; }
+html.dark .episode-tab:hover { background: #333; }
+html.dark .episode-tab.active { background: #e0e0e0; color: #1a1a1a; }
+
+html.dark .toolbar { border-bottom-color: #2a2a2a; }
+html.dark .toolbar-btn { background: #2a2a2a; color: #999; }
+html.dark .toolbar-btn:hover { background: #333; }
+html.dark .toolbar-btn.active { background: #e0e0e0; color: #1a1a1a; }
+
+html.dark .editor-area .tiptap { color: #e0e0e0; }
+html.dark .editor-area .tiptap hr { border-top-color: #333; }
+
+html.dark .editor-bottom { border-top-color: #333; }
+html.dark .btn-save { border-color: #444; color: #999; background: #1a1a1a; }
+html.dark .btn-save:hover { border-color: #e0e0e0; color: #e0e0e0; }
+html.dark .btn-upload { background: #e0e0e0; color: #1a1a1a; }
+html.dark .btn-upload:hover { background: #fff; }
+
+html.dark .note-sidebar { border-right-color: #2a2a2a; }
+html.dark .note-sidebar-item:hover { background: #2a2a2a; }
+html.dark .note-sidebar-item.active { background: #2a2a2a; }
+
+html.dark .slash-input-bar { background: #222; border-bottom-color: #333; }
+html.dark .slash-input-label { background: #333; color: #e0e0e0; }
+html.dark .slash-input { background: #1a1a1a; border-color: #444; color: #e0e0e0; }
+
+html.dark .modal-overlay { background: rgba(0, 0, 0, 0.6); }
+html.dark .modal-card { background: #222; }
+html.dark .modal-header { border-bottom-color: #333; color: #e0e0e0; }
+html.dark .modal-input { background: #1a1a1a; border-color: #444; color: #e0e0e0; }
+html.dark .modal-submit { background: #e0e0e0; color: #1a1a1a; }
+html.dark .modal-submit:hover { background: #fff; }
+
+html.dark .context-menu { background: #222; border-color: #333; }
+html.dark .context-menu-item:hover { background: #2a2a2a; }
+
+html.dark .ref-item { border-bottom-color: #333; }
+html.dark .ref-back { color: #666; }
+
+html.dark .settings-row { border-bottom-color: #333; }
+html.dark .toggle { background: #444; }
+html.dark .font-size-btn { border-color: #444; }
+
+html.dark .profile-page { background: #1a1a1a; }
+html.dark .profile-avatar-lg { background: #333; border-color: #444; }
+html.dark .profile-input { background: #1a1a1a; border-color: #444; color: #e0e0e0; }
+html.dark .profile-save { background: #e0e0e0; color: #1a1a1a; }
+html.dark .profile-save:hover { background: #fff; }
