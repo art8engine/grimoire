@@ -20,9 +20,12 @@ export default function Home() {
   const settings = useSettings();
 
   const load = useCallback(async () => {
-    setWorks(await getWorks());
-    const name = await getSetting("profile_name");
-    const avatar = await getSetting("profile_avatar");
+    const [w, name, avatar] = await Promise.all([
+      getWorks(),
+      getSetting("profile_name"),
+      getSetting("profile_avatar"),
+    ]);
+    setWorks(w);
     if (name) setProfileName(name);
     if (avatar) setProfileAvatar(avatar);
   }, []);

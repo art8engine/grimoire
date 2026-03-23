@@ -85,6 +85,15 @@ export async function getEpisodes(workId: number): Promise<Episode[]> {
   );
 }
 
+export async function getEpisode(id: number): Promise<Episode | undefined> {
+  const d = await getDb();
+  const rows = await d.select<Episode[]>(
+    "SELECT * FROM episodes WHERE id = ?",
+    [id]
+  );
+  return rows[0];
+}
+
 export async function createEpisode(workId: number, number: number): Promise<number> {
   const d = await getDb();
   const result = await d.execute(

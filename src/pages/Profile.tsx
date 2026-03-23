@@ -18,16 +18,17 @@ export default function Profile() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    (async () => {
-      const n = await getSetting("profile_name");
-      const e = await getSetting("profile_email");
-      const p = await getSetting("profile_phone");
-      const a = await getSetting("profile_avatar");
+    Promise.all([
+      getSetting("profile_name"),
+      getSetting("profile_email"),
+      getSetting("profile_phone"),
+      getSetting("profile_avatar"),
+    ]).then(([n, e, p, a]) => {
       if (n) setName(n);
       if (e) setEmail(e);
       if (p) setPhone(p);
       if (a) setAvatar(a);
-    })();
+    });
   }, []);
 
   const handlePhoneChange = (value: string) => {
@@ -46,10 +47,12 @@ export default function Profile() {
   };
 
   const handleSave = async () => {
-    await setSetting("profile_name", name);
-    await setSetting("profile_email", email);
-    await setSetting("profile_phone", phone);
-    if (avatar) await setSetting("profile_avatar", avatar);
+    await Promise.all([
+      setSetting("profile_name", name),
+      setSetting("profile_email", email),
+      setSetting("profile_phone", phone),
+      ...(avatar ? [setSetting("profile_avatar", avatar)] : []),
+    ]);
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };

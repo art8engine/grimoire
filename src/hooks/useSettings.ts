@@ -7,13 +7,11 @@ export function useSettings() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const tb = await getSetting("show_toolbar");
+    Promise.all([getSetting("show_toolbar"), getSetting("font_size")]).then(([tb, fs]) => {
       if (tb !== null) setShowToolbar(tb === "true");
-      const fs = await getSetting("font_size");
       if (fs !== null) setFontSize(parseInt(fs, 10));
       setLoaded(true);
-    })();
+    });
   }, []);
 
   const updateShowToolbar = useCallback(async (v: boolean) => {
