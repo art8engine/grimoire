@@ -784,13 +784,35 @@ input, textarea {
   gap: 24px;
 }
 
+.profile-avatar-wrap {
+  position: relative;
+  cursor: pointer;
+}
+
 .profile-avatar-lg {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   background: #eee;
   border: 2px solid #ddd;
-  cursor: pointer;
+  overflow: hidden;
+}
+
+.profile-camera {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  background: #222;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.profile-avatar {
   overflow: hidden;
 }
 
