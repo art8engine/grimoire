@@ -1,5 +1,6 @@
 export interface SlashCommandDef {
   id: string;
+  aliases: string[];
   label: string;
   description: string;
   template: object;
@@ -23,7 +24,8 @@ const hr = () => ({ type: "horizontalRule" });
 export const SLASH_COMMANDS: SlashCommandDef[] = [
   {
     id: "page",
-    label: "빈 페이지",
+    aliases: ["page", "페이지"],
+    label: "page | 페이지",
     description: "빈 페이지 추가",
     template: {
       type: "doc",
@@ -32,7 +34,8 @@ export const SLASH_COMMANDS: SlashCommandDef[] = [
   },
   {
     id: "character",
-    label: "캐릭터",
+    aliases: ["character", "캐릭터"],
+    label: "character | 캐릭터",
     description: "캐릭터 설정 템플릿",
     template: {
       type: "doc",
@@ -66,7 +69,8 @@ export const SLASH_COMMANDS: SlashCommandDef[] = [
   },
   {
     id: "map",
-    label: "세계관/지도",
+    aliases: ["map", "세계관", "지도"],
+    label: "map | 세계관",
     description: "세계관 설정 템플릿",
     template: {
       type: "doc",
@@ -96,7 +100,8 @@ export const SLASH_COMMANDS: SlashCommandDef[] = [
   },
   {
     id: "item",
-    label: "아이템/설정",
+    aliases: ["item", "아이템"],
+    label: "item | 아이템",
     description: "아이템/설정 템플릿",
     template: {
       type: "doc",
@@ -121,7 +126,8 @@ export const SLASH_COMMANDS: SlashCommandDef[] = [
   },
   {
     id: "timeline",
-    label: "타임라인",
+    aliases: ["timeline", "타임라인"],
+    label: "timeline | 타임라인",
     description: "시간순 사건 정리",
     template: {
       type: "doc",
@@ -142,7 +148,8 @@ export const SLASH_COMMANDS: SlashCommandDef[] = [
   },
   {
     id: "plot",
-    label: "플롯",
+    aliases: ["plot", "플롯"],
+    label: "plot | 플롯",
     description: "스토리 구조 정리",
     template: {
       type: "doc",
@@ -172,7 +179,6 @@ export const SLASH_COMMANDS: SlashCommandDef[] = [
   },
 ];
 
-// Default pages created for new works
 export const DEFAULT_PAGES = [
   {
     name: "캐릭터",
@@ -181,8 +187,7 @@ export const DEFAULT_PAGES = [
       content: [
         heading(1, "캐릭터 목록"),
         hr(),
-        paragraph("이 페이지에서 캐릭터를 관리합니다."),
-        paragraph("/character 로 새 캐릭터 페이지를 추가하세요."),
+        paragraph("/character 또는 /캐릭터 로 새 캐릭터 페이지를 추가하세요."),
         emptyParagraph(),
       ],
     },
@@ -194,8 +199,7 @@ export const DEFAULT_PAGES = [
       content: [
         heading(1, "세계관"),
         hr(),
-        paragraph("이 페이지에서 세계관 설정을 관리합니다."),
-        paragraph("/map 으로 장소 페이지를, /item 으로 아이템 페이지를 추가하세요."),
+        paragraph("/map 또는 /세계관 으로 장소를, /item 또는 /아이템 으로 아이템을 추가하세요."),
         emptyParagraph(),
       ],
     },
@@ -207,7 +211,7 @@ export const DEFAULT_PAGES = [
       content: [
         heading(1, "플롯"),
         hr(),
-        paragraph("/plot 으로 스토리 구조를, /timeline 으로 타임라인을 추가하세요."),
+        paragraph("/plot 또는 /플롯 으로 스토리 구조를, /timeline 또는 /타임라인 으로 타임라인을 추가하세요."),
         emptyParagraph(),
       ],
     },

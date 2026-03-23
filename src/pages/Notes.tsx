@@ -139,6 +139,12 @@ export default function Notes() {
       const newId = await createNote(workId, name, parentId, templateContent || "");
       if (editor) {
         editor.commands.insertPageLink(newId, name);
+        // Save immediately so the page link persists
+        if (activeNote) {
+          const json = JSON.stringify(editor.getJSON());
+          await updateNoteContent(activeNote.id, json);
+          setContent(json);
+        }
       }
       const n = await getNotes(workId);
       setNotes(n);

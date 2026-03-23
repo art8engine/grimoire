@@ -10,8 +10,9 @@ interface SlashMenuProps {
 export default function SlashMenu({ query, onSelect, onClose }: SlashMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  const q = query.toLowerCase();
   const filtered = SLASH_COMMANDS.filter(
-    (c) => c.id.includes(query.toLowerCase()) || c.label.includes(query)
+    (c) => c.aliases.some((a) => a.includes(q)) || c.label.includes(q)
   );
 
   useEffect(() => {
