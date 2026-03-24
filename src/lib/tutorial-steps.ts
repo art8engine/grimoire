@@ -1,12 +1,13 @@
 export interface TutorialStep {
   id: string;
-  type: "welcome" | "profile" | "spotlight" | "info" | "complete";
+  type: "welcome" | "profile" | "spotlight" | "info" | "wait" | "complete";
   target?: string;
   title: string;
   text: string;
   position?: "top" | "bottom" | "left" | "right";
   waitForClick?: boolean;
   waitForKey?: string;
+  waitForElement?: string;
   route?: string;
 }
 
@@ -34,10 +35,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     route: "/home",
   },
   {
-    id: "info-create-work",
-    type: "info",
+    id: "wait-create-work",
+    type: "wait",
     title: "작품 정보 입력",
     text: "제목과 설명을 입력하고 등록하세요.\n\n튜토리얼용 작품을 등록할 예정입니다.\n빠른 삭제 처리가 가능하니 걱정하지 않으셔도 됩니다.",
+    waitForElement: ".work-poster:not(.work-poster-add)",
   },
   {
     id: "spotlight-work-poster",

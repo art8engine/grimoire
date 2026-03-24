@@ -140,13 +140,11 @@ export default function EpisodeList() {
 
       {showCreateConfirm && (
         <div className="modal-overlay" onClick={() => setShowCreateConfirm(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <span>새 회차</span>
-              <button className="modal-close" onClick={() => setShowCreateConfirm(false)}>&#10005;</button>
-            </div>
-            <div className="modal-body">
-              <p className="confirm-text">{latestNum + 1}화 작성을 시작하시겠습니까?</p>
+          <div className="modal-card modal-compact" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-body" style={{ padding: "24px" }}>
+              <p className="confirm-text" style={{ textAlign: "center", marginBottom: 20, fontSize: 14 }}>
+                {latestNum + 1}화 작성을 시작하시겠습니까?
+              </p>
               <div className="confirm-buttons">
                 <button className="btn-save" onClick={() => setShowCreateConfirm(false)}>취소</button>
                 <button className="btn-upload" onClick={handleCreateConfirm}>시작</button>

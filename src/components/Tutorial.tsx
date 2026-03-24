@@ -30,6 +30,8 @@ export default function Tutorial({ step, onNext, onSkip }: TutorialProps) {
           onSkip={onSkip}
         />
       );
+    case "wait":
+      return <WaitPage step={step} onNext={onNext} onSkip={onSkip} />;
     case "info":
       return <InfoPage step={step} onNext={onNext} onSkip={onSkip} />;
     case "complete":
@@ -161,6 +163,39 @@ function ProfilePage({
         <button className="tutorial-btn-skip" onClick={onSkip}>
           건너뛰기
         </button>
+      </div>
+    </div>
+  );
+}
+
+function WaitPage({
+  step,
+  onNext,
+  onSkip,
+}: {
+  step: TutorialStep;
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  // Wait for a DOM element to appear, then auto-advance
+  useEffect(() => {
+    if (!step.waitForElement) return;
+    const check = () => {
+      const el = document.querySelector(step.waitForElement!);
+      if (el) {
+        onNext();
+      }
+    };
+    const interval = setInterval(check, 500);
+    return () => clearInterval(interval);
+  }, [step.waitForElement, onNext]);
+
+  return (
+    <div className="tutorial-wait-overlay">
+      <div className="tutorial-wait-hint">
+        <div className="tutorial-wait-title">{step.title}</div>
+        <div className="tutorial-wait-text">{step.text}</div>
+        <button className="tutorial-btn-skip" onClick={onSkip}>건너뛰기</button>
       </div>
     </div>
   );
