@@ -13,6 +13,17 @@ interface ReferenceModalProps {
 export default function ReferenceModal({ notes, onClose }: ReferenceModalProps) {
   const [selected, setSelected] = useState<Note | null>(null);
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
   const [content, setContent] = useState("");
 
   const editor = useEditor({

@@ -1895,7 +1895,7 @@ html.dark .profile-save:hover { background: #fff; }
 
 .tutorial-wait-hint {
   position: fixed;
-  bottom: 24px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
@@ -1906,6 +1906,7 @@ html.dark .profile-save:hover { background: #fff; }
   pointer-events: auto;
   animation: modalSlideIn 0.25s ease;
   max-width: 400px;
+  z-index: 9991;
 }
 
 .tutorial-wait-title {
