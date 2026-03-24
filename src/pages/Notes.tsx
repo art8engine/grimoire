@@ -314,7 +314,15 @@ export default function Notes() {
 
           {showToolbar && <Toolbar editor={editor} />}
 
-          <div className="editor-area" style={{ fontSize, position: "relative" }}>
+          <div
+            className="editor-area"
+            style={{ fontSize, position: "relative" }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget && editor) {
+                editor.commands.focus("end");
+              }
+            }}
+          >
             <EditorContent editor={editor} />
             {slashOpen && (
               <SlashMenu

@@ -605,6 +605,10 @@ html.dark .page-link-node:hover { border-color: #e0e0e0; background: #2a2a2a; }
   padding: 20px;
 }
 
+.editor-area {
+  cursor: text;
+}
+
 .editor-area .tiptap {
   outline: none;
   min-height: 100%;

@@ -107,7 +107,15 @@ export default function Editor() {
 
       {showToolbar && <Toolbar editor={editor} />}
 
-      <div className="editor-area" style={{ fontSize }}>
+      <div
+        className="editor-area"
+        style={{ fontSize }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget && editor) {
+            editor.commands.focus("end");
+          }
+        }}
+      >
         <EditorContent editor={editor} />
       </div>
 
