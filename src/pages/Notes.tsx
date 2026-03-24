@@ -29,6 +29,8 @@ export default function Notes() {
   const [sideCtx, setSideCtx] = useState<{ x: number; y: number; note: Note } | null>(null);
   const [renaming, setRenaming] = useState<Note | null>(null);
   const [renameName, setRenameName] = useState("");
+  const [addingRoot, setAddingRoot] = useState(false);
+  const [newRootName, setNewRootName] = useState("");
   const [slashOpen, setSlashOpen] = useState(false);
   const [slashQuery, setSlashQuery] = useState("");
   const [nameInput, setNameInput] = useState(false);
@@ -253,25 +255,39 @@ export default function Notes() {
               setRenaming={setRenaming}
             />
           ))}
-          <button
-            className="note-sidebar-add"
-            onClick={async () => {
-              const name = prompt("새 루트 페이지 이름");
-              if (!name?.trim()) return;
-              try {
-                const newId = await createNote(workId, name.trim(), null);
-                const n = await getNotes(workId);
-                setNotes(n);
-                const created = n.find((note) => note.id === newId);
-                if (created) {
-                  setActiveNote(created);
-                  navigate(`/work/${workId}/notes/${newId}`, { replace: true });
+          {addingRoot ? (
+            <input
+              className="note-sidebar-input"
+              value={newRootName}
+              onChange={(e) => setNewRootName(e.target.value)}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter" && newRootName.trim()) {
+                  const name = newRootName.trim();
+                  setAddingRoot(false);
+                  setNewRootName("");
+                  try {
+                    const newId = await createNote(workId, name, null);
+                    const n = await getNotes(workId);
+                    setNotes(n);
+                    const created = n.find((note) => note.id === newId);
+                    if (created) {
+                      setActiveNote(created);
+                      navigate(`/work/${workId}/notes/${newId}`, { replace: true });
+                    }
+                  } catch { /* */ }
                 }
-              } catch (err) {
-                console.error("Create root note error:", err);
-              }
-            }}
-          >+</button>
+                if (e.key === "Escape") { setAddingRoot(false); setNewRootName(""); }
+              }}
+              onBlur={() => { setAddingRoot(false); setNewRootName(""); }}
+              placeholder="페이지 이름"
+              autoFocus
+            />
+          ) : (
+            <button
+              className="note-sidebar-add"
+              onClick={() => setAddingRoot(true)}
+            >+</button>
+          )}
         </div>
 
         <div className="note-content">
