@@ -1042,12 +1042,9 @@ html.dark .dark-toggle:hover { color: #e0e0e0; border-color: #e0e0e0; }
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.15s;
 }
 
 .work-poster { position: relative; }
-.work-poster:hover .more-btn { opacity: 1; }
 .more-btn:hover { background: #f0f0f0; color: #222; }
 
 .more-btn-inline {
