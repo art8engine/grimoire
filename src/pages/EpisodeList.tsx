@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import TopBar from "../components/TopBar";
 import ContextMenu from "../components/ContextMenu";
 import { getWork, getEpisodes, createEpisode, deleteEpisode, updateEpisodeThumbnail } from "../lib/db";
@@ -9,6 +9,7 @@ import type { Work, Episode } from "../lib/db";
 export default function EpisodeList() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const workId = Number(id);
   const [work, setWork] = useState<Work | null>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -16,6 +17,7 @@ export default function EpisodeList() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadingEpId, setUploadingEpId] = useState<number | null>(null);
   const [showCreateConfirm, setShowCreateConfirm] = useState(false);
+  const [toast, setToast] = useState("");
 
   const load = useCallback(async () => {
     const eps = await getEpisodes(workId);
@@ -25,7 +27,13 @@ export default function EpisodeList() {
   useEffect(() => {
     getWork(workId).then((w) => setWork(w ?? null));
     load();
-  }, [workId, load]);
+    const uploaded = searchParams.get("uploaded");
+    if (uploaded) {
+      setToast(`${work?.title ?? ""} ${uploaded}화 업로드 완료`);
+      setSearchParams({}, { replace: true });
+      setTimeout(() => setToast(""), 2500);
+    }
+  }, [workId, load, searchParams, setSearchParams, work?.title]);
 
   const handleCreateConfirm = async () => {
     setShowCreateConfirm(false);
@@ -59,6 +67,7 @@ export default function EpisodeList() {
 
   return (
     <div className="home">
+      {toast && <div className="toast">{toast}</div>}
       <TopBar showBack right="원고" />
 
       <input

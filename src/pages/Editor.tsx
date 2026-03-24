@@ -34,26 +34,37 @@ export default function Editor() {
   const [showRef, setShowRef] = useState(false);
   const [status, setStatus] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showEditConfirm, setShowEditConfirm] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [uploadThumb, setUploadThumb] = useState("");
   const [loaded, setLoaded] = useState(false);
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [hasUnsaved, setHasUnsaved] = useState(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const thumbRef = useRef<HTMLInputElement>(null);
   const { showToolbar, fontSize } = useSettings();
 
+  // New episode (no content yet) starts in edit mode
+  const isNew = loaded && episode && !episode.content;
+
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Placeholder.configure({ placeholder: "" }),
+      Placeholder.configure({ placeholder: editing || isNew ? "" : "" }),
       Image.configure({ inline: false, allowBase64: true }),
     ],
+    editable: editing || !!isNew,
     content: undefined,
     onUpdate: ({ editor: e }) => {
       setContent(JSON.stringify(e.getJSON()));
       setHasUnsaved(true);
     },
   });
+
+  // Sync editable state
+  useEffect(() => {
+    if (editor) editor.setEditable(editing || !!isNew);
+  }, [editing, isNew, editor]);
 
   const flash = useCallback((msg: string) => {
     if (flashTimer.current) clearTimeout(flashTimer.current);
@@ -79,6 +90,7 @@ export default function Editor() {
         setEpNumber(String(ep.number));
         setEpTitle(ep.title || "");
         setUploadThumb(ep.thumbnail || "");
+        if (!ep.content) setEditing(true);
       }
       setLoaded(true);
     }).catch((err) => {
@@ -97,9 +109,9 @@ export default function Editor() {
 
   const save = useCallback(
     async (c: string) => {
-      if (episode) await updateEpisodeContent(episode.id, c);
+      if (episode && editing) await updateEpisodeContent(episode.id, c);
     },
-    [episode]
+    [episode, editing]
   );
 
   useAutoSave(content, save);
@@ -111,12 +123,8 @@ export default function Editor() {
       updateEpisodeTitle(episode.id, epTitle),
       updateEpisodeNumber(episode.id, Number(epNumber) || episode.number),
     ]);
+    setHasUnsaved(false);
     flash("저장됨");
-  };
-
-  const handleUploadClick = () => {
-    if (!episode) return;
-    setShowUploadModal(true);
   };
 
   const handleUploadConfirm = async () => {
@@ -128,7 +136,7 @@ export default function Editor() {
       uploadThumb ? updateEpisodeThumbnail(episode.id, uploadThumb) : Promise.resolve(),
     ]);
     setShowUploadModal(false);
-    navigate(`/work/${workId}/episodes`);
+    navigate(`/work/${workId}/episodes?uploaded=${epNumber}`);
   };
 
   const handleThumbUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,19 +146,9 @@ export default function Editor() {
     setUploadThumb(src);
   };
 
-  const handleNumberBlur = async () => {
-    if (!episode) return;
-    const num = Number(epNumber);
-    if (num && num !== episode.number) {
-      await updateEpisodeNumber(episode.id, num);
-    }
-  };
-
-  const handleTitleBlur = async () => {
-    if (!episode) return;
-    if (epTitle !== episode.title) {
-      await updateEpisodeTitle(episode.id, epTitle);
-    }
+  const handleBack = () => {
+    if (hasUnsaved && editing) setShowLeaveModal(true);
+    else navigate(-1);
   };
 
   useEffect(() => {
@@ -169,10 +167,7 @@ export default function Editor() {
   return (
     <div className="editor-page">
       <div className="topbar">
-        <button className="topbar-back" onClick={() => {
-          if (hasUnsaved) { setShowLeaveModal(true); }
-          else { navigate(-1); }
-        }}>&#8592;</button>
+        <button className="topbar-back" onClick={handleBack}>&#8592;</button>
         <span className="topbar-logo">GRIMOIRE</span>
         <span className="topbar-right">{work?.title ? `${work.title} / 원고` : ""}</span>
       </div>
@@ -183,7 +178,12 @@ export default function Editor() {
             className="editor-ep-number"
             value={epNumber}
             onChange={(e) => setEpNumber(e.target.value.replace(/\D/g, ""))}
-            onBlur={handleNumberBlur}
+            onBlur={() => {
+              if (!episode) return;
+              const num = Number(epNumber);
+              if (num && num !== episode.number) updateEpisodeNumber(episode.id, num);
+            }}
+            readOnly={!editing}
           />
           <span>화</span>
         </div>
@@ -191,18 +191,21 @@ export default function Editor() {
           className="editor-ep-title"
           value={epTitle}
           onChange={(e) => setEpTitle(e.target.value)}
-          onBlur={handleTitleBlur}
+          onBlur={() => {
+            if (episode && epTitle !== episode.title) updateEpisodeTitle(episode.id, epTitle);
+          }}
           placeholder="제목"
+          readOnly={!editing}
         />
       </div>
 
-      {showToolbar && <Toolbar editor={editor} />}
+      {editing && showToolbar && <Toolbar editor={editor} />}
 
       <div
         className="editor-area"
         style={{ fontSize }}
         onClick={(e) => {
-          if (e.target === e.currentTarget && editor) {
+          if (e.target === e.currentTarget && editor && editing) {
             editor.commands.focus("end");
           }
         }}
@@ -210,47 +213,57 @@ export default function Editor() {
         <EditorContent editor={editor} />
       </div>
 
-      <div className="editor-bottom">
-        <button className={`btn-save${status ? " btn-saved" : ""}`} onClick={handleDraftSave}>
-          {status || "임시저장"}
+      {editing ? (
+        <div className="editor-bottom">
+          <button className={`btn-save${status ? " btn-saved" : ""}`} onClick={handleDraftSave}>
+            {status || "임시저장"}
+          </button>
+          <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
+            업로드
+          </button>
+        </div>
+      ) : (
+        <button className="fab-edit" onClick={() => setShowEditConfirm(true)}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
         </button>
-        <button className="btn-upload" onClick={handleUploadClick}>
-          업로드
-        </button>
-      </div>
+      )}
+
+      {showEditConfirm && (
+        <div className="modal-overlay" onClick={() => setShowEditConfirm(false)}>
+          <div className="modal-card modal-compact" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-body" style={{ padding: "24px" }}>
+              <p className="confirm-text" style={{ textAlign: "center", marginBottom: 20 }}>
+                {epNumber}화를 수정하시겠습니까?
+              </p>
+              <div className="confirm-buttons">
+                <button className="btn-save" onClick={() => setShowEditConfirm(false)}>취소</button>
+                <button className="btn-upload" onClick={() => { setShowEditConfirm(false); setEditing(true); }}>수정</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showUploadModal && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <span>회차 업로드</span>
-              <button className="modal-close" onClick={() => setShowUploadModal(false)}>&#10005;</button>
-            </div>
-            <div className="modal-body">
-              <div className="upload-info">
-                <span>{epNumber}화</span>
-                {epTitle && <span> — {epTitle}</span>}
-              </div>
-              <div
-                className="upload-thumb-area"
-                onClick={() => thumbRef.current?.click()}
-              >
+          <div className="modal-card modal-wide" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-body" style={{ padding: "24px" }}>
+              <div className="upload-info">{epNumber}화{epTitle && ` — ${epTitle}`}</div>
+              <div className="upload-thumb-area" onClick={() => thumbRef.current?.click()}>
                 {uploadThumb ? (
                   <img src={uploadThumb} className="upload-thumb-img" />
                 ) : (
                   <span className="upload-thumb-placeholder">썸네일 추가</span>
                 )}
               </div>
-              <input
-                ref={thumbRef}
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleThumbUpload}
-              />
-              <button className="modal-submit" onClick={handleUploadConfirm}>
-                업로드
-              </button>
+              <input ref={thumbRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleThumbUpload} />
+              <div className="confirm-buttons">
+                <button className="btn-save" onClick={() => setShowUploadModal(false)}>취소</button>
+                <button className="btn-upload" onClick={handleUploadConfirm}>업로드</button>
+              </div>
             </div>
           </div>
         </div>
@@ -258,13 +271,11 @@ export default function Editor() {
 
       {showLeaveModal && (
         <div className="modal-overlay" onClick={() => setShowLeaveModal(false)}>
-          <div className="modal-card modal-animate" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <span>저장하지 않은 변경사항</span>
-              <button className="modal-close" onClick={() => setShowLeaveModal(false)}>&#10005;</button>
-            </div>
-            <div className="modal-body">
-              <p className="confirm-text">저장하고 이동하시겠습니까?</p>
+          <div className="modal-card modal-compact" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-body" style={{ padding: "24px" }}>
+              <p className="confirm-text" style={{ textAlign: "center", marginBottom: 20 }}>
+                저장하고 이동하시겠습니까?
+              </p>
               <div className="confirm-buttons">
                 <button className="btn-save" onClick={() => { setShowLeaveModal(false); navigate(-1); }}>저장 안 함</button>
                 <button className="btn-upload" onClick={async () => {
