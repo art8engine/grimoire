@@ -506,17 +506,20 @@ html.dark .fab-edit { background: #e0e0e0; color: #1a1a1a; }
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  background: #222;
-  color: #fff;
-  padding: 10px 24px;
-  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  padding: 12px 28px;
+  border-radius: 10px;
   font-size: 13px;
+  font-weight: 500;
   z-index: 300;
-  animation: toastIn 0.3s ease, toastOut 0.3s ease 2s forwards;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
+  animation: toastIn 0.3s ease, toastOut 0.4s ease 2s forwards;
   pointer-events: none;
 }
 
-html.dark .toast { background: #e0e0e0; color: #1a1a1a; }
+html.dark .toast { background: #2a2a2a; color: #e0e0e0; border-color: #333; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3); }
 
 @keyframes toastIn {
   from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
