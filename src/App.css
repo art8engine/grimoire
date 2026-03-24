@@ -123,8 +123,8 @@ input, textarea {
 
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
 }
 
 .work-poster {
@@ -193,10 +193,10 @@ input, textarea {
 }
 
 .work-poster-thumb {
-  flex: 1;
+  flex: 2;
   background-size: cover;
   background-position: center;
-  min-height: 80px;
+  min-height: 140px;
 }
 
 .work-thumb-upload {
