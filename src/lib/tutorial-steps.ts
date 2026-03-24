@@ -8,6 +8,7 @@ export interface TutorialStep {
   waitForClick?: boolean;
   waitForKey?: string;
   waitForElement?: string;
+  waitForElementGone?: string;
   route?: string;
 }
 
@@ -96,10 +97,25 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     waitForElement: ".editor-a4,.editor-scroll",
   },
   {
-    id: "info-editor",
-    type: "info",
-    title: "원고 작성",
-    text: "여기에 소설을 작성합니다.\n\nCmd+B  굵게\nCmd+I  기울임\n#  제목 (H1)\n##  소제목 (H2)",
+    id: "hint-type",
+    type: "wait",
+    title: "글을 써보세요",
+    text: "에디터에 아무 글이나 입력해보세요.\n글을 입력하면 다음 단계로 넘어갑니다.",
+    waitForElement: ".editor-a4 .tiptap p:not(.is-editor-empty)",
+  },
+  {
+    id: "hint-bold",
+    type: "wait",
+    title: "굵게 만들기",
+    text: "텍스트를 선택한 후 Cmd+B를 눌러보세요.\n또는 툴바의 B 버튼을 클릭하세요.",
+    waitForElement: ".editor-a4 .tiptap strong",
+  },
+  {
+    id: "hint-heading",
+    type: "wait",
+    title: "제목 만들기",
+    text: "새 줄에서 # + 스페이스를 입력하면 제목이 됩니다.\n또는 툴바의 H1 버튼을 클릭하세요.",
+    waitForElement: ".editor-a4 .tiptap h1,.editor-a4 .tiptap h2",
   },
   {
     id: "spotlight-editor-bottom",
@@ -110,17 +126,18 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     position: "top",
   },
   {
-    id: "info-reference-try",
-    type: "info",
-    title: "참고 노트",
-    text: "원고 작성 중 Shift+Tab을 누르면\n노트를 참조할 수 있습니다.\n\n지금 Shift+Tab을 눌러보세요!",
-    waitForKey: "Tab",
+    id: "hint-shift-tab",
+    type: "wait",
+    title: "참고 노트 열기",
+    text: "Shift+Tab을 눌러보세요.\n글을 쓰면서 노트를 참조할 수 있습니다.",
+    waitForElement: ".ref-modal",
   },
   {
-    id: "info-reference-done",
-    type: "info",
+    id: "hint-ref-done",
+    type: "wait",
     title: "참고 노트",
-    text: "이렇게 노트를 확인하면서 글을 쓸 수 있습니다.\n연필 아이콘을 누르면 노트를 수정할 수도 있습니다.\n\nESC로 닫고 다음으로 넘어가세요.",
+    text: "노트를 확인하고 연필 아이콘으로 수정도 가능합니다.\nESC 또는 X를 눌러 닫으세요.",
+    waitForElementGone: ".ref-modal",
   },
 
   // Phase 5: Notes (노트)

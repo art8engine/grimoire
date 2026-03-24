@@ -177,18 +177,27 @@ function WaitPage({
   onNext: () => void;
   onSkip: () => void;
 }) {
-  // Wait for a DOM element to appear, then auto-advance
   useEffect(() => {
-    if (!step.waitForElement) return;
-    const check = () => {
-      const el = document.querySelector(step.waitForElement!);
-      if (el) {
-        onNext();
-      }
-    };
-    const interval = setInterval(check, 500);
-    return () => clearInterval(interval);
-  }, [step.waitForElement, onNext]);
+    if (step.waitForElement) {
+      const check = () => {
+        const el = document.querySelector(step.waitForElement!);
+        if (el) onNext();
+      };
+      const interval = setInterval(check, 500);
+      return () => clearInterval(interval);
+    }
+    if (step.waitForElementGone) {
+      // Wait a bit first so the element appears, then wait for it to disappear
+      let started = false;
+      const check = () => {
+        const el = document.querySelector(step.waitForElementGone!);
+        if (el) started = true;
+        if (started && !el) onNext();
+      };
+      const interval = setInterval(check, 500);
+      return () => clearInterval(interval);
+    }
+  }, [step.waitForElement, step.waitForElementGone, onNext]);
 
   return (
     <div className="tutorial-wait-overlay">
