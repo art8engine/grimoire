@@ -15,6 +15,7 @@ export default function EpisodeList() {
   const [ctx, setCtx] = useState<{ x: number; y: number; ep: Episode } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadingEpId, setUploadingEpId] = useState<number | null>(null);
+  const [showCreateConfirm, setShowCreateConfirm] = useState(false);
 
   const load = useCallback(async () => {
     const eps = await getEpisodes(workId);
@@ -26,7 +27,8 @@ export default function EpisodeList() {
     load();
   }, [workId, load]);
 
-  const handleCreate = async () => {
+  const handleCreateConfirm = async () => {
+    setShowCreateConfirm(false);
     const nextNum = episodes.length > 0 ? Math.max(...episodes.map((e) => e.number)) + 1 : 1;
     const newId = await createEpisode(workId, nextNum);
     navigate(`/work/${workId}/editor/${newId}`);
@@ -107,7 +109,7 @@ export default function EpisodeList() {
           </div>
         ))}
 
-        <button className="work-add-btn" onClick={handleCreate}>
+        <button className="work-add-btn" onClick={() => setShowCreateConfirm(true)}>
           + {latestNum + 1}화 작성하기
         </button>
       </div>
@@ -122,6 +124,24 @@ export default function EpisodeList() {
             { label: "삭제", danger: true, onClick: () => handleDelete(ctx.ep) },
           ]}
         />
+      )}
+
+      {showCreateConfirm && (
+        <div className="modal-overlay" onClick={() => setShowCreateConfirm(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <span>새 회차</span>
+              <button className="modal-close" onClick={() => setShowCreateConfirm(false)}>&#10005;</button>
+            </div>
+            <div className="modal-body">
+              <p className="confirm-text">{latestNum + 1}화 작성을 시작하시겠습니까?</p>
+              <div className="confirm-buttons">
+                <button className="btn-save" onClick={() => setShowCreateConfirm(false)}>취소</button>
+                <button className="btn-upload" onClick={handleCreateConfirm}>시작</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
