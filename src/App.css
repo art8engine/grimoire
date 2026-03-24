@@ -533,6 +533,54 @@ html.dark .page-link-node:hover { border-color: #e0e0e0; background: #2a2a2a; }
   flex-direction: column;
 }
 
+.editor-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 4px;
+}
+
+.editor-ep-number {
+  width: 36px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.editor-ep-number:focus {
+  border-color: #222;
+}
+
+.editor-ep-suffix {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-right: 12px;
+}
+
+.editor-ep-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+}
+
+.editor-ep-title:focus {
+  border-bottom-color: #222;
+}
+
+html.dark .editor-header { border-bottom-color: #333; }
+html.dark .editor-ep-number { border-color: #444; background: #1a1a1a; color: #e0e0e0; }
+html.dark .editor-ep-number:focus { border-color: #e0e0e0; }
+html.dark .editor-ep-suffix { color: #999; }
+html.dark .editor-ep-title { color: #e0e0e0; }
+html.dark .editor-ep-title:focus { border-bottom-color: #e0e0e0; }
+
 .episode-tabs {
   display: flex;
   align-items: center;

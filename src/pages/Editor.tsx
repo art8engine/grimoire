@@ -8,7 +8,8 @@ import TopBar from "../components/TopBar";
 import Toolbar from "../components/Toolbar";
 import ReferenceModal from "../components/ReferenceModal";
 import {
-  getWork, getEpisode, updateEpisodeContent, getNotes,
+  getWork, getEpisode, updateEpisodeContent, updateEpisodeTitle,
+  updateEpisodeNumber, getNotes,
 } from "../lib/db";
 import { useAutoSave } from "../hooks/useAutoSave";
 import { useSettings } from "../hooks/useSettings";
@@ -26,9 +27,12 @@ export default function Editor() {
   const [work, setWork] = useState<Work | null>(null);
   const [episode, setEpisode] = useState<Episode | null>(null);
   const [content, setContent] = useState("");
+  const [epNumber, setEpNumber] = useState("");
+  const [epTitle, setEpTitle] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [showRef, setShowRef] = useState(false);
   const [status, setStatus] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { showToolbar, fontSize } = useSettings();
 
@@ -55,6 +59,7 @@ export default function Editor() {
   }, []);
 
   useEffect(() => {
+    if (!workId || !epId || isNaN(workId) || isNaN(epId)) return;
     Promise.all([
       getWork(workId),
       getEpisode(epId),
@@ -63,6 +68,14 @@ export default function Editor() {
       setWork(w ?? null);
       setEpisode(ep ?? null);
       setNotes(n);
+      if (ep) {
+        setEpNumber(String(ep.number));
+        setEpTitle(ep.title || "");
+      }
+      setLoaded(true);
+    }).catch((err) => {
+      console.error("Editor load error:", err);
+      setLoaded(true);
     });
   }, [workId, epId]);
 
@@ -84,9 +97,27 @@ export default function Editor() {
   useAutoSave(content, save);
 
   const handleSave = async (label: string) => {
-    if (episode && content) {
-      await updateEpisodeContent(episode.id, content);
-      flash(label);
+    if (!episode) return;
+    await Promise.all([
+      updateEpisodeContent(episode.id, content),
+      updateEpisodeTitle(episode.id, epTitle),
+      updateEpisodeNumber(episode.id, Number(epNumber) || episode.number),
+    ]);
+    flash(label);
+  };
+
+  const handleNumberBlur = async () => {
+    if (!episode) return;
+    const num = Number(epNumber);
+    if (num && num !== episode.number) {
+      await updateEpisodeNumber(episode.id, num);
+    }
+  };
+
+  const handleTitleBlur = async () => {
+    if (!episode) return;
+    if (epTitle !== episode.title) {
+      await updateEpisodeTitle(episode.id, epTitle);
     }
   };
 
@@ -101,9 +132,28 @@ export default function Editor() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  if (!loaded) return null;
+
   return (
     <div className="editor-page">
-      <TopBar showBack right={work?.title ? `${work.title} / 원고 / ${episode?.number ?? ""}화` : ""} />
+      <TopBar showBack right={work?.title ? `${work.title} / 원고` : ""} />
+
+      <div className="editor-header">
+        <input
+          className="editor-ep-number"
+          value={epNumber}
+          onChange={(e) => setEpNumber(e.target.value.replace(/\D/g, ""))}
+          onBlur={handleNumberBlur}
+        />
+        <span className="editor-ep-suffix">화</span>
+        <input
+          className="editor-ep-title"
+          value={epTitle}
+          onChange={(e) => setEpTitle(e.target.value)}
+          onBlur={handleTitleBlur}
+          placeholder="제목 입력"
+        />
+      </div>
 
       {showToolbar && <Toolbar editor={editor} />}
 

@@ -101,6 +101,22 @@ export async function createEpisode(workId: number, number: number): Promise<num
   return result.lastInsertId ?? 0;
 }
 
+export async function updateEpisodeTitle(id: number, title: string): Promise<void> {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE episodes SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [title, id]
+  );
+}
+
+export async function updateEpisodeNumber(id: number, number: number): Promise<void> {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE episodes SET number = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [number, id]
+  );
+}
+
 export async function updateEpisodeContent(id: number, content: string): Promise<void> {
   const d = await getDb();
   await d.execute(
