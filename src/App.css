@@ -1907,16 +1907,17 @@ html.dark .profile-save:hover { background: #fff; }
   animation: modalSlideIn 0.25s ease;
   max-width: 400px;
   z-index: 9991;
+  font-size: 14px !important;
 }
 
 .tutorial-wait-title {
-  font-size: 14px;
+  font-size: 14px !important;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .tutorial-wait-text {
-  font-size: 12px;
+  font-size: 12px !important;
   color: #888;
   line-height: 1.6;
   white-space: pre-line;
@@ -1946,6 +1947,7 @@ html.dark .tutorial-wait-text { color: #666; }
   max-width: 320px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
   animation: tutorialBubbleIn 0.25s ease;
+  font-size: 14px !important;
 }
 
 .tutorial-bubble-title {

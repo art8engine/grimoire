@@ -142,16 +142,19 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 
   // Phase 5: Notes (노트)
   {
-    id: "info-go-notes",
-    type: "info",
+    id: "spotlight-back-btn",
+    type: "spotlight",
+    target: ".topbar-back",
     title: "노트 알아보기",
-    text: "이제 노트 기능을 알아볼까요?\n뒤로가기를 눌러 대시보드로 돌아가세요.",
+    text: "이제 노트를 알아볼까요?\n좌측 상단의 뒤로가기를 눌러주세요.",
+    position: "bottom",
+    waitForClick: true,
   },
   {
     id: "wait-dashboard-2",
     type: "wait",
     title: "대시보드",
-    text: "뒤로가기를 눌러 대시보드로 돌아가세요.",
+    text: "이동 중...",
     waitForElement: ".dashboard-card:last-child",
   },
   {
@@ -171,16 +174,25 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     waitForElement: ".note-sidebar",
   },
   {
-    id: "info-notes",
-    type: "info",
-    title: "노트 사용법",
-    text: "이곳에서 작품의 디테일을 기록합니다.\n\n좌측에 페이지 목록이 표시되고\n우측에서 내용을 편집합니다.",
+    id: "hint-notes-intro",
+    type: "wait",
+    title: "노트",
+    text: "이곳에서 작품의 디테일을 기록합니다.\n좌측에 페이지 목록, 우측에서 편집합니다.\n\n에디터에 아무 글이나 입력해보세요.",
+    waitForElement: ".note-content .tiptap p:not(.is-editor-empty)",
   },
   {
-    id: "info-slash",
-    type: "info",
+    id: "hint-slash-try",
+    type: "wait",
     title: "슬래시 명령어",
-    text: "에디터에서 /를 입력하면 명령어 메뉴가 나타납니다.\n\n/character  캐릭터 템플릿\n/map  세계관 템플릿\n/item  아이템 템플릿\n/timeline  타임라인\n/plot  플롯 구조\n/page  빈 페이지\n\n한글도 지원됩니다. (/캐릭터, /세계관 등)",
+    text: "에디터에서 /를 입력해보세요.\n명령어 메뉴가 나타납니다.\n\n/character  캐릭터 템플릿\n/map  세계관 템플릿\n/item  아이템 템플릿\n\n한글도 가능합니다. (/캐릭터, /세계관 등)",
+    waitForElement: ".slash-menu",
+  },
+  {
+    id: "hint-slash-select",
+    type: "wait",
+    title: "템플릿 선택",
+    text: "방향키로 이동하고 Enter로 선택하세요.\n또는 마우스로 클릭하세요.",
+    waitForElementGone: ".slash-menu",
   },
 
   // Phase 6: Complete
