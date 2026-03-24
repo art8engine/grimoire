@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { getSetting, setSetting, resetAllData } from "../lib/db";
+import { getSetting, setSetting, getWorks, resetAllData } from "../lib/db";
 import { TUTORIAL_STEPS } from "../lib/tutorial-steps";
 
 export function useTutorial() {
@@ -8,14 +8,25 @@ export function useTutorial() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getSetting("onboarding_completed").then(async (v) => {
-      if (v === null) {
-        // 최초 접속: 데이터 초기화 후 튜토리얼 시작
-        await resetAllData();
-        setIsActive(true);
+    (async () => {
+      const v = await getSetting("onboarding_completed");
+      if (v === "true") {
+        // 온보딩 완료 → 스킵
+        setLoaded(true);
+        return;
       }
+      // 온보딩 미완료 → 기존 데이터 확인
+      const works = await getWorks();
+      if (works.length > 0) {
+        // 기존 데이터 존재 → 튜토리얼 스킵, 완료 처리
+        await setSetting("onboarding_completed", "true");
+        setLoaded(true);
+        return;
+      }
+      // 데이터 없음 → 튜토리얼 시작
+      setIsActive(true);
       setLoaded(true);
-    });
+    })();
   }, []);
 
   const currentStep = isActive ? TUTORIAL_STEPS[stepIndex] ?? null : null;
@@ -43,9 +54,8 @@ export function useTutorial() {
   }, []);
 
   const reset = useCallback(async () => {
-    const { resetAllData } = await import("../lib/db");
     await resetAllData();
-    window.location.href = "/home";
+    window.location.href = "/";
   }, []);
 
   return { stepIndex, isActive, currentStep, next, skip, complete, reset, loaded };
