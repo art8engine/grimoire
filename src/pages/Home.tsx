@@ -4,7 +4,7 @@ import TopBar from "../components/TopBar";
 import CreateWorkModal from "../components/CreateWorkModal";
 import ContextMenu from "../components/ContextMenu";
 import SettingsModal from "../components/SettingsModal";
-import { getWorks, createWork, updateWork, deleteWork, getSetting } from "../lib/db";
+import { getWorks, createWork, updateWork, updateWorkThumbnail, deleteWork, getSetting } from "../lib/db";
 import { useSettings } from "../hooks/useSettings";
 import type { Work } from "../lib/db";
 
@@ -37,15 +37,17 @@ export default function Home({ dark, onToggleDark }: HomeProps) {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleCreate = async (title: string, description: string) => {
-    await createWork(title, description);
+  const handleCreate = async (title: string, description: string, thumbnail: string) => {
+    const id = await createWork(title, description);
+    if (thumbnail) await updateWorkThumbnail(id, thumbnail);
     setShowCreate(false);
     await load();
   };
 
-  const handleEdit = async (title: string, description: string) => {
+  const handleEdit = async (title: string, description: string, thumbnail: string) => {
     if (!editWork) return;
     await updateWork(editWork.id, title, description);
+    if (thumbnail) await updateWorkThumbnail(editWork.id, thumbnail);
     setEditWork(null);
     await load();
   };
@@ -81,6 +83,9 @@ export default function Home({ dark, onToggleDark }: HomeProps) {
                     setCtx({ x: e.clientX, y: e.clientY, work: w });
                   }}
                 >&#8942;</button>
+                {w.thumbnail && (
+                  <div className="work-poster-thumb" style={{ backgroundImage: `url(${w.thumbnail})` }} />
+                )}
                 <div className="work-poster-body">
                   <div className="work-poster-title">{w.title}</div>
                   {w.description && <div className="work-poster-desc">{w.description}</div>}
@@ -132,7 +137,7 @@ export default function Home({ dark, onToggleDark }: HomeProps) {
         <CreateWorkModal
           onClose={() => setEditWork(null)}
           onSubmit={handleEdit}
-          initial={{ title: editWork.title, description: editWork.description }}
+          initial={{ title: editWork.title, description: editWork.description, thumbnail: editWork.thumbnail }}
         />
       )}
 

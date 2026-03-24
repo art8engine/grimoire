@@ -63,6 +63,7 @@ input, textarea {
   padding: 14px 20px;
   border-bottom: 1px solid #eee;
   height: 48px;
+  position: relative;
 }
 
 .topbar-back {
@@ -176,20 +177,58 @@ input, textarea {
 .work-poster-add {
   align-items: center;
   justify-content: center;
-  color: #ccc;
+  color: #bbb;
   font-size: 13px;
   gap: 8px;
-  border-style: dashed;
+  background: #fafafa;
 }
 
 .work-poster-add:hover {
   color: #222;
-  border-color: #222;
+  background: #f0f0f0;
 }
 
 .work-poster-add span:first-child {
   font-size: 24px;
 }
+
+.work-poster-thumb {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  min-height: 80px;
+}
+
+.work-thumb-upload {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: 160px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.work-thumb-upload:hover { border-color: #222; }
+
+.work-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.work-thumb-placeholder {
+  font-size: 12px;
+  color: #bbb;
+}
+
+html.dark .work-thumb-upload { border-color: #333; }
+html.dark .work-thumb-upload:hover { border-color: #e0e0e0; }
+html.dark .work-thumb-placeholder { color: #555; }
 
 .work-add-btn {
   display: block;
@@ -747,6 +786,112 @@ html.dark .upload-thumb-placeholder { color: #555; }
   overflow-y: auto;
   padding: 20px;
 }
+
+/* A4 Editor Layout */
+.editor-scroll {
+  flex: 1;
+  overflow-y: auto;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  cursor: text;
+}
+
+.editor-scroll.full {
+  background: #fff;
+  padding: 0;
+}
+
+.editor-a4 {
+  width: 680px;
+  min-height: 800px;
+  background: #fff;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  padding: 48px 56px;
+  transition: width 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
+}
+
+.editor-a4.full {
+  width: 100%;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 24px 20px;
+  min-height: 100%;
+}
+
+.editor-a4 .tiptap {
+  outline: none;
+  min-height: 600px;
+  line-height: 2;
+}
+
+.editor-a4 .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #ccc;
+  pointer-events: none;
+  height: 0;
+}
+
+.editor-a4 .tiptap h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+
+.editor-a4 .tiptap h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 12px 0 6px;
+}
+
+.editor-a4 .tiptap hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 16px 0;
+}
+
+.editor-a4 .tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+/* Options dropdown */
+.options-dropdown {
+  position: absolute;
+  top: 44px;
+  right: 12px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 8px 12px;
+  z-index: 50;
+  min-width: 200px;
+  animation: modalSlideIn 0.15s ease;
+}
+
+.options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+html.dark .editor-scroll { background: #111; }
+html.dark .editor-scroll.full { background: #1a1a1a; }
+html.dark .editor-a4 { background: #1a1a1a; box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3); }
+html.dark .editor-a4.full { box-shadow: none; }
+html.dark .editor-a4 .tiptap { color: #e0e0e0; }
+html.dark .editor-a4 .tiptap hr { border-top-color: #333; }
+html.dark .options-dropdown { background: #222; border-color: #333; }
+html.dark .options-row { color: #999; }
 
 .editor-area {
   cursor: text;

@@ -15,6 +15,7 @@ export interface Work {
   id: number;
   title: string;
   description: string;
+  thumbnail: string;
   created_at: string;
   updated_at: string;
   episode_count?: number;
@@ -54,6 +55,14 @@ export async function updateWork(id: number, title: string, description: string)
   await d.execute(
     "UPDATE works SET title = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
     [title, description, id]
+  );
+}
+
+export async function updateWorkThumbnail(id: number, thumbnail: string): Promise<void> {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE works SET thumbnail = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [thumbnail, id]
   );
 }
 
@@ -279,6 +288,7 @@ export async function initDb(): Promise<void> {
   // Migrations
   try { await d.execute("ALTER TABLE notes ADD COLUMN parent_id INTEGER REFERENCES notes(id) ON DELETE CASCADE"); } catch { /* exists */ }
   try { await d.execute("ALTER TABLE episodes ADD COLUMN thumbnail TEXT DEFAULT ''"); } catch { /* exists */ }
+  try { await d.execute("ALTER TABLE works ADD COLUMN thumbnail TEXT DEFAULT ''"); } catch { /* exists */ }
   // Remove old UNIQUE constraint by recreating table if needed
   try {
     const tableInfo = await d.select<{ sql: string }[]>("SELECT sql FROM sqlite_master WHERE type='table' AND name='notes'");

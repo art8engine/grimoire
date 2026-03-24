@@ -40,9 +40,12 @@ export default function Editor() {
   const [loaded, setLoaded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [hasUnsaved, setHasUnsaved] = useState(false);
+  const [fullWidth, setFullWidth] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [editorFontSize, setEditorFontSize] = useState(16);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const thumbRef = useRef<HTMLInputElement>(null);
-  const { showToolbar, fontSize } = useSettings();
+  const { showToolbar } = useSettings();
 
   // New episode (no content yet) starts in edit mode
   const isNew = loaded && episode && !episode.content;
@@ -170,6 +173,23 @@ export default function Editor() {
         <button className="topbar-back" onClick={handleBack}>&#8592;</button>
         <span className="topbar-logo">GRIMOIRE</span>
         <span className="topbar-right">{work?.title ? `${work.title} / 원고` : ""}</span>
+        <button className="more-btn-inline" style={{ marginLeft: 8 }} onClick={() => setShowOptions(!showOptions)}>&#8942;</button>
+        {showOptions && (
+          <div className="options-dropdown">
+            <div className="options-row">
+              <span>텍스트 크기</span>
+              <div className="font-size-control">
+                <button className="font-size-btn" onClick={() => setEditorFontSize((s) => Math.max(12, s - 1))}>-</button>
+                <span className="font-size-value">{editorFontSize}</span>
+                <button className="font-size-btn" onClick={() => setEditorFontSize((s) => Math.min(28, s + 1))}>+</button>
+              </div>
+            </div>
+            <div className="options-row">
+              <span>{fullWidth ? "A4 화면" : "전체 화면"}</span>
+              <div className={`toggle${fullWidth ? "" : " on"}`} onClick={() => setFullWidth(!fullWidth)} />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="editor-header">
@@ -201,16 +221,18 @@ export default function Editor() {
 
       {editing && showToolbar && <Toolbar editor={editor} />}
 
-      <div
-        className="editor-area"
-        style={{ fontSize }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget && editor && editing) {
-            editor.commands.focus("end");
-          }
-        }}
-      >
-        <EditorContent editor={editor} />
+      <div className={`editor-scroll${fullWidth ? " full" : ""}`}>
+        <div
+          className={`editor-a4${fullWidth ? " full" : ""}`}
+          style={{ fontSize: editorFontSize }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && editor && editing) {
+              editor.commands.focus("end");
+            }
+          }}
+        >
+          <EditorContent editor={editor} />
+        </div>
       </div>
 
       {editing ? (
