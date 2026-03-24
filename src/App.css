@@ -56,6 +56,36 @@ input, textarea {
   color: #999;
 }
 
+.intro-page {
+  gap: 16px;
+}
+
+.intro-start-btn {
+  margin-top: 32px;
+  padding: 12px 40px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #222;
+  border-radius: 8px;
+  letter-spacing: 1px;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.intro-start-btn:hover {
+  background: #000;
+  transform: scale(1.02);
+}
+
+html.dark .intro-start-btn {
+  background: #e0e0e0;
+  color: #1a1a1a;
+}
+
+html.dark .intro-start-btn:hover {
+  background: #fff;
+}
+
 /* Top Bar */
 .topbar {
   display: flex;
