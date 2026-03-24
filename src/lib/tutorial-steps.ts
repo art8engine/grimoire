@@ -110,10 +110,17 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     position: "top",
   },
   {
-    id: "info-reference",
+    id: "info-reference-try",
     type: "info",
     title: "참고 노트",
-    text: "원고 작성 중 Shift+Tab을 누르면\n노트를 참조할 수 있습니다.\n\n설정이나 캐릭터 정보를 확인하면서 글을 쓰세요.",
+    text: "원고 작성 중 Shift+Tab을 누르면\n노트를 참조할 수 있습니다.\n\n지금 Shift+Tab을 눌러보세요!",
+    waitForKey: "Tab",
+  },
+  {
+    id: "info-reference-done",
+    type: "info",
+    title: "참고 노트",
+    text: "이렇게 노트를 확인하면서 글을 쓸 수 있습니다.\n연필 아이콘을 누르면 노트를 수정할 수도 있습니다.\n\nESC로 닫고 다음으로 넘어가세요.",
   },
 
   // Phase 5: Notes (노트)
@@ -121,7 +128,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     id: "info-go-notes",
     type: "info",
     title: "노트 알아보기",
-    text: "이제 노트 기능을 알아볼까요?\n뒤로 가서 노트를 열어보겠습니다.",
+    text: "이제 노트 기능을 알아볼까요?\n뒤로가기를 눌러 대시보드로 돌아가세요.",
   },
   {
     id: "wait-dashboard-2",
