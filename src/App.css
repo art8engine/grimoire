@@ -676,6 +676,26 @@ html.dark .page-link-node:hover { border-color: #e0e0e0; background: #2a2a2a; }
   font-weight: 500;
 }
 
+.note-sidebar-add {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  font-size: 16px;
+  color: #ccc;
+  text-align: center;
+  border: 1px dashed #eee;
+  border-radius: 4px;
+}
+
+.note-sidebar-add:hover {
+  color: #222;
+  border-color: #222;
+}
+
+html.dark .note-sidebar-add { color: #555; border-color: #333; }
+html.dark .note-sidebar-add:hover { color: #e0e0e0; border-color: #e0e0e0; }
+
 .note-content {
   flex: 1;
   display: flex;

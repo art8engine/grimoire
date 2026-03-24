@@ -253,6 +253,25 @@ export default function Notes() {
               setRenaming={setRenaming}
             />
           ))}
+          <button
+            className="note-sidebar-add"
+            onClick={async () => {
+              const name = prompt("새 루트 페이지 이름");
+              if (!name?.trim()) return;
+              try {
+                const newId = await createNote(workId, name.trim(), null);
+                const n = await getNotes(workId);
+                setNotes(n);
+                const created = n.find((note) => note.id === newId);
+                if (created) {
+                  setActiveNote(created);
+                  navigate(`/work/${workId}/notes/${newId}`, { replace: true });
+                }
+              } catch (err) {
+                console.error("Create root note error:", err);
+              }
+            }}
+          >+</button>
         </div>
 
         <div className="note-content">
