@@ -836,15 +836,15 @@ html.dark .upload-thumb-placeholder { color: #555; }
 }
 
 .editor-a4 .tiptap h1 {
-  font-size: 24px;
+  font-size: 1.6em;
   font-weight: 700;
-  margin: 16px 0 8px;
+  margin: 0.8em 0 0.4em;
 }
 
 .editor-a4 .tiptap h2 {
-  font-size: 20px;
+  font-size: 1.3em;
   font-weight: 600;
-  margin: 12px 0 6px;
+  margin: 0.6em 0 0.3em;
 }
 
 .editor-a4 .tiptap hr {
@@ -913,15 +913,15 @@ html.dark .options-row { color: #999; }
 }
 
 .editor-area .tiptap h1 {
-  font-size: 24px;
+  font-size: 1.6em;
   font-weight: 700;
-  margin: 16px 0 8px;
+  margin: 0.8em 0 0.4em;
 }
 
 .editor-area .tiptap h2 {
-  font-size: 20px;
+  font-size: 1.3em;
   font-weight: 600;
-  margin: 12px 0 6px;
+  margin: 0.6em 0 0.3em;
 }
 
 .editor-area .tiptap hr {
