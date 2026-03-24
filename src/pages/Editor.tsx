@@ -8,7 +8,7 @@ import Toolbar from "../components/Toolbar";
 import ReferenceModal from "../components/ReferenceModal";
 import { resizeAndEncode } from "../lib/image-upload";
 import {
-  getWork, getEpisode, updateEpisodeContent, updateEpisodeTitle,
+  getWork, getEpisode, getEpisodes, updateEpisodeContent, updateEpisodeTitle,
   updateEpisodeNumber, updateEpisodeThumbnail, getNotes,
 } from "../lib/db";
 import { useAutoSave } from "../hooks/useAutoSave";
@@ -27,6 +27,7 @@ export default function Editor() {
   const epId = Number(episodeId);
   const [work, setWork] = useState<Work | null>(null);
   const [episode, setEpisode] = useState<Episode | null>(null);
+  const [allEpisodes, setAllEpisodes] = useState<Episode[]>([]);
   const [content, setContent] = useState("");
   const [epNumber, setEpNumber] = useState("");
   const [epTitle, setEpTitle] = useState("");
@@ -47,16 +48,13 @@ export default function Editor() {
   const thumbRef = useRef<HTMLInputElement>(null);
   const { showToolbar } = useSettings();
 
-  // New episode (no content yet) starts in edit mode
-  const isNew = loaded && episode && !episode.content;
-
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Placeholder.configure({ placeholder: editing || isNew ? "" : "" }),
+      Placeholder.configure({ placeholder: "" }),
       Image.configure({ inline: false, allowBase64: true }),
     ],
-    editable: editing || !!isNew,
+    editable: false,
     content: undefined,
     onUpdate: ({ editor: e }) => {
       setContent(JSON.stringify(e.getJSON()));
@@ -64,10 +62,9 @@ export default function Editor() {
     },
   });
 
-  // Sync editable state
   useEffect(() => {
-    if (editor) editor.setEditable(editing || !!isNew);
-  }, [editing, isNew, editor]);
+    if (editor) editor.setEditable(editing);
+  }, [editing, editor]);
 
   const flash = useCallback((msg: string) => {
     if (flashTimer.current) clearTimeout(flashTimer.current);
@@ -84,10 +81,12 @@ export default function Editor() {
     Promise.all([
       getWork(workId),
       getEpisode(epId),
+      getEpisodes(workId),
       getNotes(workId),
-    ]).then(([w, ep, n]) => {
+    ]).then(([w, ep, eps, n]) => {
       setWork(w ?? null);
       setEpisode(ep ?? null);
+      setAllEpisodes(eps);
       setNotes(n);
       if (ep) {
         setEpNumber(String(ep.number));
@@ -154,6 +153,15 @@ export default function Editor() {
     else navigate(-1);
   };
 
+  // Previous/next episode navigation
+  const currentIdx = allEpisodes.findIndex((e) => e.id === epId);
+  const prevEp = currentIdx > 0 ? allEpisodes[currentIdx - 1] : null;
+  const nextEp = currentIdx < allEpisodes.length - 1 ? allEpisodes[currentIdx + 1] : null;
+
+  const goToEp = (ep: Episode) => {
+    navigate(`/work/${workId}/editor/${ep.id}`, { replace: true });
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Tab" && e.shiftKey) {
@@ -167,6 +175,78 @@ export default function Editor() {
 
   if (!loaded) return null;
 
+  // READONLY VIEW - novel reading mode
+  if (!editing) {
+    return (
+      <div className="reader-page">
+        <div className="topbar">
+          <button className="topbar-back" onClick={() => navigate(-1)}>&#8592;</button>
+          <span className="topbar-logo">GRIMOIRE</span>
+          <span className="topbar-right">{work?.title}</span>
+        </div>
+
+        <div className="reader-scroll">
+          <div className="reader-content" style={{ fontSize: editorFontSize }}>
+            <div className="reader-header">
+              <div className="reader-ep-num">{epNumber}화</div>
+              {epTitle && <h1 className="reader-title">{epTitle}</h1>}
+            </div>
+
+            {uploadThumb && (
+              <div className="reader-thumb">
+                <img src={uploadThumb} />
+              </div>
+            )}
+
+            <div className="reader-body">
+              <EditorContent editor={editor} />
+            </div>
+
+            <div className="reader-nav">
+              {prevEp ? (
+                <button className="reader-nav-btn" onClick={() => goToEp(prevEp)}>
+                  &#8592; {prevEp.number}화
+                </button>
+              ) : <div />}
+              <span className="reader-nav-current">{epNumber}화</span>
+              {nextEp ? (
+                <button className="reader-nav-btn" onClick={() => goToEp(nextEp)}>
+                  {nextEp.number}화 &#8594;
+                </button>
+              ) : <div />}
+            </div>
+          </div>
+        </div>
+
+        <button className="fab-edit" onClick={() => setShowEditConfirm(true)}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+
+        {showEditConfirm && (
+          <div className="modal-overlay" onClick={() => setShowEditConfirm(false)}>
+            <div className="modal-card modal-compact" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-body" style={{ padding: "24px" }}>
+                <p className="confirm-text" style={{ textAlign: "center", marginBottom: 20 }}>
+                  {epNumber}화를 수정하시겠습니까?
+                </p>
+                <div className="confirm-buttons">
+                  <button className="btn-save" onClick={() => setShowEditConfirm(false)}>취소</button>
+                  <button className="btn-upload" onClick={() => { setShowEditConfirm(false); setEditing(true); }}>수정</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showRef && <ReferenceModal notes={notes} onClose={() => setShowRef(false)} />}
+      </div>
+    );
+  }
+
+  // EDIT MODE
   return (
     <div className="editor-page">
       <div className="topbar">
@@ -203,7 +283,6 @@ export default function Editor() {
               const num = Number(epNumber);
               if (num && num !== episode.number) updateEpisodeNumber(episode.id, num);
             }}
-            readOnly={!editing}
           />
           <span>화</span>
         </div>
@@ -215,18 +294,17 @@ export default function Editor() {
             if (episode && epTitle !== episode.title) updateEpisodeTitle(episode.id, epTitle);
           }}
           placeholder="제목"
-          readOnly={!editing}
         />
       </div>
 
-      {editing && showToolbar && <Toolbar editor={editor} />}
+      {showToolbar && <Toolbar editor={editor} />}
 
       <div className={`editor-scroll${fullWidth ? " full" : ""}`}>
         <div
           className={`editor-a4${fullWidth ? " full" : ""}`}
           style={{ fontSize: editorFontSize }}
           onClick={(e) => {
-            if (e.target === e.currentTarget && editor && editing) {
+            if (e.target === e.currentTarget && editor) {
               editor.commands.focus("end");
             }
           }}
@@ -235,39 +313,14 @@ export default function Editor() {
         </div>
       </div>
 
-      {editing ? (
-        <div className="editor-bottom">
-          <button className={`btn-save${status ? " btn-saved" : ""}`} onClick={handleDraftSave}>
-            {status || "임시저장"}
-          </button>
-          <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
-            업로드
-          </button>
-        </div>
-      ) : (
-        <button className="fab-edit" onClick={() => setShowEditConfirm(true)}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
+      <div className="editor-bottom">
+        <button className={`btn-save${status ? " btn-saved" : ""}`} onClick={handleDraftSave}>
+          {status || "임시저장"}
         </button>
-      )}
-
-      {showEditConfirm && (
-        <div className="modal-overlay" onClick={() => setShowEditConfirm(false)}>
-          <div className="modal-card modal-compact" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-body" style={{ padding: "24px" }}>
-              <p className="confirm-text" style={{ textAlign: "center", marginBottom: 20 }}>
-                {epNumber}화를 수정하시겠습니까?
-              </p>
-              <div className="confirm-buttons">
-                <button className="btn-save" onClick={() => setShowEditConfirm(false)}>취소</button>
-                <button className="btn-upload" onClick={() => { setShowEditConfirm(false); setEditing(true); }}>수정</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        <button className="btn-upload" onClick={() => setShowUploadModal(true)}>
+          업로드
+        </button>
+      </div>
 
       {showUploadModal && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
