@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { getSetting, setSetting } from "../lib/db";
+import { getSetting, setSetting, resetAllData } from "../lib/db";
 import { TUTORIAL_STEPS } from "../lib/tutorial-steps";
 
 export function useTutorial() {
@@ -8,8 +8,10 @@ export function useTutorial() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getSetting("onboarding_completed").then((v) => {
+    getSetting("onboarding_completed").then(async (v) => {
       if (v === null) {
+        // 최초 접속: 데이터 초기화 후 튜토리얼 시작
+        await resetAllData();
         setIsActive(true);
       }
       setLoaded(true);
