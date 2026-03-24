@@ -252,6 +252,18 @@ export function buildNoteTree(notes: Note[]): (Note & { children: Note[] })[] {
   return roots;
 }
 
+// --- Reset (for tutorial) ---
+
+export async function resetAllData(): Promise<void> {
+  const d = await getDb();
+  await d.execute("DELETE FROM notes");
+  await d.execute("DELETE FROM episodes");
+  await d.execute("DELETE FROM works");
+  await d.execute("DELETE FROM settings WHERE key = 'onboarding_completed'");
+  await d.execute("DELETE FROM settings WHERE key = 'profile_name'");
+  await d.execute("DELETE FROM settings WHERE key = 'profile_avatar'");
+}
+
 // --- Init ---
 
 export async function initDb(): Promise<void> {

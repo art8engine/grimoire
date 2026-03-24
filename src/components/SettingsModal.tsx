@@ -4,6 +4,7 @@ interface SettingsModalProps {
   onToggleToolbar: (v: boolean) => void;
   onChangeFontSize: (v: number) => void;
   onClose: () => void;
+  onTutorialReset?: () => Promise<void>;
 }
 
 export default function SettingsModal({
@@ -12,7 +13,14 @@ export default function SettingsModal({
   onToggleToolbar,
   onChangeFontSize,
   onClose,
+  onTutorialReset,
 }: SettingsModalProps) {
+  const handleTutorialReset = async () => {
+    if (!onTutorialReset) return;
+    await onTutorialReset();
+    onClose();
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -46,6 +54,14 @@ export default function SettingsModal({
               </button>
             </div>
           </div>
+          {onTutorialReset && (
+            <div className="settings-row">
+              <span>튜토리얼 다시 보기</span>
+              <button className="tutorial-reset-btn" onClick={handleTutorialReset}>
+                초기화
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -11,9 +11,10 @@ import type { Work } from "../lib/db";
 interface HomeProps {
   dark?: boolean;
   onToggleDark?: () => void;
+  tutorialReset?: () => Promise<void>;
 }
 
-export default function Home({ dark, onToggleDark }: HomeProps) {
+export default function Home({ dark, onToggleDark, tutorialReset }: HomeProps) {
   const navigate = useNavigate();
   const [works, setWorks] = useState<Work[]>([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -160,6 +161,7 @@ export default function Home({ dark, onToggleDark }: HomeProps) {
           onToggleToolbar={settings.updateShowToolbar}
           onChangeFontSize={settings.updateFontSize}
           onClose={() => setShowSettings(false)}
+          onTutorialReset={tutorialReset}
         />
       )}
     </div>

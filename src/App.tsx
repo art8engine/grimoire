@@ -7,11 +7,14 @@ import Editor from "./pages/Editor";
 import Notes from "./pages/Notes";
 import Profile from "./pages/Profile";
 import EpisodeList from "./pages/EpisodeList";
+import Tutorial from "./components/Tutorial";
+import { useTutorial } from "./hooks/useTutorial";
 import { initDb, getSetting, setSetting } from "./lib/db";
 
 export default function App() {
   const [dbReady, setDbReady] = useState(false);
   const [dark, setDark] = useState(false);
+  const tutorial = useTutorial();
 
   useEffect(() => {
     initDb().then(() => {
@@ -60,7 +63,7 @@ export default function App() {
           if (next) document.documentElement.classList.add("dark");
           else document.documentElement.classList.remove("dark");
           setSetting("dark_mode", String(next));
-        }} />} />
+        }} tutorialReset={tutorial.reset} />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/work/:id" element={<Dashboard />} />
         <Route path="/work/:id/episodes" element={<EpisodeList />} />
@@ -68,6 +71,13 @@ export default function App() {
         <Route path="/work/:id/notes" element={<Notes />} />
         <Route path="/work/:id/notes/:noteId" element={<Notes />} />
       </Routes>
+      {tutorial.isActive && (
+        <Tutorial
+          step={tutorial.currentStep}
+          onNext={tutorial.next}
+          onSkip={tutorial.skip}
+        />
+      )}
     </BrowserRouter>
   );
 }
