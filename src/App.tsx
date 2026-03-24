@@ -14,7 +14,7 @@ import { initDb, getSetting, setSetting } from "./lib/db";
 export default function App() {
   const [dbReady, setDbReady] = useState(false);
   const [dark, setDark] = useState(false);
-  const tutorial = useTutorial();
+  const tutorial = useTutorial(dbReady);
 
   useEffect(() => {
     initDb().then(() => {
