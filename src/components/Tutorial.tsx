@@ -15,9 +15,9 @@ export default function Tutorial({ step, onNext, onSkip }: TutorialProps) {
 
   switch (step.type) {
     case "welcome":
-      return <WelcomeCard step={step} onNext={onNext} onSkip={onSkip} />;
+      return <WelcomePage step={step} onNext={onNext} onSkip={onSkip} />;
     case "profile":
-      return <ProfileCard step={step} onNext={onNext} onSkip={onSkip} />;
+      return <ProfilePage step={step} onNext={onNext} onSkip={onSkip} />;
     case "spotlight":
       return (
         <TutorialSpotlight
@@ -31,15 +31,15 @@ export default function Tutorial({ step, onNext, onSkip }: TutorialProps) {
         />
       );
     case "info":
-      return <InfoCard step={step} onNext={onNext} onSkip={onSkip} />;
+      return <InfoPage step={step} onNext={onNext} onSkip={onSkip} />;
     case "complete":
-      return <CompleteCard step={step} onNext={onNext} onSkip={onSkip} />;
+      return <CompletePage step={step} onNext={onNext} />;
     default:
       return null;
   }
 }
 
-function WelcomeCard({
+function WelcomePage({
   step,
   onNext,
   onSkip,
@@ -49,25 +49,23 @@ function WelcomeCard({
   onSkip: () => void;
 }) {
   return (
-    <div className="tutorial-overlay tutorial-center-overlay">
-      <div className="tutorial-card tutorial-card-welcome">
+    <div className="tutorial-fullpage">
+      <div className="tutorial-fullpage-content">
         <div className="tutorial-logo">GRIMOIRE</div>
-        <div className="tutorial-card-title">{step.title}</div>
-        <div className="tutorial-card-text">{step.text}</div>
-        <div className="tutorial-card-actions">
-          <button className="tutorial-btn-primary" onClick={onNext}>
-            시작하기
-          </button>
-          <button className="tutorial-btn-skip" onClick={onSkip}>
-            건너뛰기
-          </button>
-        </div>
+        <div className="tutorial-fullpage-title">{step.title}</div>
+        <div className="tutorial-fullpage-text">{step.text}</div>
+        <button className="tutorial-btn-primary" onClick={onNext}>
+          시작하기
+        </button>
+        <button className="tutorial-btn-skip" onClick={onSkip}>
+          건너뛰기
+        </button>
       </div>
     </div>
   );
 }
 
-function ProfileCard({
+function ProfilePage({
   step,
   onNext,
   onSkip,
@@ -89,10 +87,6 @@ function ProfileCard({
     return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
   };
 
-  const handleAvatarClick = useCallback(() => {
-    fileRef.current?.click();
-  }, []);
-
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -112,21 +106,17 @@ function ProfileCard({
   }, [name, email, phone, avatar, onNext]);
 
   return (
-    <div className="tutorial-overlay tutorial-center-overlay">
-      <div className="tutorial-card tutorial-card-profile">
-        <div className="tutorial-card-title">{step.title}</div>
-        <div className="tutorial-card-text">{step.text}</div>
-        <div className="tutorial-profile-form">
+    <div className="tutorial-fullpage">
+      <div className="tutorial-fullpage-content">
+        <div className="tutorial-fullpage-title">{step.title}</div>
+        <div className="tutorial-fullpage-text">{step.text}</div>
+        <div className="tutorial-profile-section">
           <div
             className="tutorial-avatar-upload"
-            onClick={handleAvatarClick}
+            onClick={() => fileRef.current?.click()}
             style={
               avatar
-                ? {
-                    backgroundImage: `url(${avatar})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }
+                ? { backgroundImage: `url(${avatar})`, backgroundSize: "cover", backgroundPosition: "center" }
                 : undefined
             }
           >
@@ -139,45 +129,44 @@ function ProfileCard({
             style={{ display: "none" }}
             onChange={handleFileChange}
           />
-          <input
-            className="tutorial-name-input"
-            type="text"
-            placeholder="필명"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="tutorial-name-input"
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="tutorial-name-input"
-            type="tel"
-            placeholder="전화번호"
-            value={phone}
-            onChange={(e) => setPhone(formatPhone(e.target.value))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSubmit();
-            }}
-          />
+          <div className="tutorial-form-fields">
+            <input
+              className="tutorial-input"
+              type="text"
+              placeholder="필명"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+            <input
+              className="tutorial-input"
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              className="tutorial-input"
+              type="tel"
+              placeholder="전화번호"
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+            />
+          </div>
         </div>
-        <div className="tutorial-card-actions">
-          <button className="tutorial-btn-primary" onClick={handleSubmit}>
-            다음
-          </button>
-          <button className="tutorial-btn-skip" onClick={onSkip}>
-            건너뛰기
-          </button>
-        </div>
+        <button className="tutorial-btn-primary" onClick={handleSubmit}>
+          다음
+        </button>
+        <button className="tutorial-btn-skip" onClick={onSkip}>
+          건너뛰기
+        </button>
       </div>
     </div>
   );
 }
 
-function InfoCard({
+function InfoPage({
   step,
   onNext,
   onSkip,
@@ -189,51 +178,44 @@ function InfoCard({
   useEffect(() => {
     if (!step.waitForKey) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === step.waitForKey) {
-        onNext();
-      }
+      if (e.key === step.waitForKey) onNext();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [step.waitForKey, onNext]);
 
   return (
-    <div className="tutorial-overlay tutorial-center-overlay">
-      <div className="tutorial-card tutorial-card-info">
-        <div className="tutorial-card-title">{step.title}</div>
-        <div className="tutorial-card-text">{step.text}</div>
-        <div className="tutorial-card-actions">
-          <button className="tutorial-btn-next" onClick={onNext}>
-            다음
-          </button>
-          <button className="tutorial-btn-skip" onClick={onSkip}>
-            건너뛰기
-          </button>
-        </div>
+    <div className="tutorial-fullpage">
+      <div className="tutorial-fullpage-content">
+        <div className="tutorial-fullpage-title">{step.title}</div>
+        <div className="tutorial-fullpage-text">{step.text}</div>
+        <button className="tutorial-btn-primary" onClick={onNext}>
+          다음
+        </button>
+        <button className="tutorial-btn-skip" onClick={onSkip}>
+          건너뛰기
+        </button>
       </div>
     </div>
   );
 }
 
-function CompleteCard({
+function CompletePage({
   step,
   onNext,
 }: {
   step: TutorialStep;
   onNext: () => void;
-  onSkip: () => void;
 }) {
   return (
-    <div className="tutorial-overlay tutorial-center-overlay">
-      <div className="tutorial-card tutorial-card-complete">
-        <div className="tutorial-complete-icon">&#10003;</div>
-        <div className="tutorial-card-title">{step.title}</div>
-        <div className="tutorial-card-text">{step.text}</div>
-        <div className="tutorial-card-actions">
-          <button className="tutorial-btn-primary" onClick={onNext}>
-            시작하기
-          </button>
-        </div>
+    <div className="tutorial-fullpage">
+      <div className="tutorial-fullpage-content">
+        <div className="tutorial-complete-check">&#10003;</div>
+        <div className="tutorial-fullpage-title">{step.title}</div>
+        <div className="tutorial-fullpage-text">{step.text}</div>
+        <button className="tutorial-btn-primary" onClick={onNext}>
+          시작하기
+        </button>
       </div>
     </div>
   );
