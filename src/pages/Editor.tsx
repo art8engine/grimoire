@@ -150,7 +150,7 @@ export default function Editor() {
 
   const handleBack = () => {
     if (hasUnsaved && editing) setShowLeaveModal(true);
-    else navigate(-1);
+    else navigate(`/work/${workId}/episodes`);
   };
 
   // Previous/next episode navigation
@@ -180,7 +180,7 @@ export default function Editor() {
     return (
       <div className="reader-page">
         <div className="topbar">
-          <button className="topbar-back" onClick={() => navigate(-1)}>&#8592;</button>
+          <button className="topbar-back" onClick={() => navigate(`/work/${workId}/episodes`)}>&#8592;</button>
           <span className="topbar-logo">GRIMOIRE</span>
           <span className="topbar-right">{work?.title}</span>
         </div>
@@ -352,11 +352,11 @@ export default function Editor() {
                 저장하고 이동하시겠습니까?
               </p>
               <div className="confirm-buttons">
-                <button className="btn-save" onClick={() => { setShowLeaveModal(false); navigate(-1); }}>저장 안 함</button>
+                <button className="btn-save" onClick={() => { setShowLeaveModal(false); navigate(`/work/${workId}/episodes`); }}>저장 안 함</button>
                 <button className="btn-upload" onClick={async () => {
                   await handleDraftSave();
                   setShowLeaveModal(false);
-                  navigate(-1);
+                  navigate(`/work/${workId}/episodes`);
                 }}>저장 후 이동</button>
               </div>
             </div>

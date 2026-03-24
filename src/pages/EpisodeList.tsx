@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import TopBar from "../components/TopBar";
 import ContextMenu from "../components/ContextMenu";
 import { getWork, getEpisodes, createEpisode, deleteEpisode, updateEpisodeThumbnail } from "../lib/db";
 import { resizeAndEncode } from "../lib/image-upload";
@@ -68,7 +67,11 @@ export default function EpisodeList() {
   return (
     <div className="home">
       {toast && <div className="toast">{toast}</div>}
-      <TopBar showBack right="원고" />
+      <div className="topbar">
+        <button className="topbar-back" onClick={() => navigate(`/work/${workId}`)}>&#8592;</button>
+        <span className="topbar-logo">GRIMOIRE</span>
+        <span className="topbar-right">원고</span>
+      </div>
 
       <input
         ref={fileRef}
